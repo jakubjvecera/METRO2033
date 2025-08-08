@@ -1,8 +1,7 @@
-let batteryTime = 30; // v sekundách, výchozí čas baterky
+let batteryTime = 30; // výchozí čas v sekundách
 let timerInterval = null;
 let flashlightOn = false;
 let alarmTriggered = false;
-let wakeLock = null;
 
 const timerEl = document.getElementById("timer");
 const toggleBtn = document.getElementById("toggleBtn");
@@ -12,38 +11,11 @@ const alarmMsg = document.getElementById("alarmMsg");
 const flashlightEl = document.getElementById("flashlight");
 const fallbackEl = document.getElementById("fallback");
 
-// Zvuk alarmu
+// Zvuk alarmu (dej si do projektu soubor alarm.mp3)
 const alarmSound = new Audio('alarm.mp3');
 alarmSound.preload = 'auto';
 
-// Kontrola podpory svítilny (iOS neumožňuje ovládání true svítilny)
-const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent);
-const supportsTorch = !isIOS && 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices;
-
-let stream = null;
-let track = null;
-
-async function requestWakeLock() {
-  try {
-    if ('wakeLock' in navigator) {
-      wakeLock = await navigator.wakeLock.request('screen');
-      wakeLock.addEventListener('release', () => {
-        console.log('Wake Lock uvolněn');
-      });
-      console.log('Wake Lock aktivní');
-    }
-  } catch (err) {
-    console.warn('Nelze aktivovat Wake Lock:', err);
-  }
-}
-
-async function releaseWakeLock() {
-  if (wakeLock) {
-    await wakeLock.release();
-    wakeLock = null;
-  }
-}
-
+// --- Funkce timeru a aktualizace ---
 function updateTimer() {
   let min = Math.floor(batteryTime / 60);
   let sec = batteryTime % 60;
@@ -74,79 +46,37 @@ function startTimer() {
   }, 1000);
 }
 
-async function enterFullscreen() {
-  if (document.documentElement.requestFullscreen) {
-    try {
-      await document.documentElement.requestFullscreen();
-    } catch (e) {
-      console.warn("Nelze přepnout do fullscreen:", e);
-    }
-  }
-}
-
-async function exitFullscreen() {
-  if (document.exitFullscreen) {
-    try {
-      await document.exitFullscreen();
-    } catch (e) {
-      console.warn("Nelze ukončit fullscreen:", e);
-    }
-  }
-}
-
-async function turnOnFlashlight() {
+// --- Simulovaná svítilna (pouze bílá obrazovka) ---
+function turnOnFlashlight() {
   if (flashlightOn) return;
-  if (supportsTorch) {
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', torch: true }
-      });
-      track = stream.getVideoTracks()[0];
-      await track.applyConstraints({ advanced: [{ torch: true }] });
-    } catch(e) {
-      console.warn("Nelze zapnout svítilnu:", e);
-      fallbackEl.style.display = 'block';
-    }
-  } else {
-    // fallback bílá obrazovka na iOS
-    fallbackEl.style.display = 'block';
-  }
-  flashlightEl.style.display = 'block';
+  fallbackEl.style.display = 'block'; // zobraz bílou obrazovku
+  flashlightEl.style.display = 'block'; // zobraz celou obrazovku s bílým pozadím
   flashlightOn = true;
   alarmMsg.textContent = "";
   startTimer();
-  await enterFullscreen();
-  await requestWakeLock();
+  toggleBtn.textContent = "Vypnout svítilnu";
 }
 
-async function turnOffFlashlight() {
+function turnOffFlashlight() {
   if (!flashlightOn) return;
-  if (supportsTorch && track) {
-    track.applyConstraints({ advanced: [{ torch: false }] }).catch(() => {});
-    track.stop();
-    stream && stream.getTracks().forEach(t => t.stop());
-    stream = null;
-    track = null;
-  }
   fallbackEl.style.display = 'none';
   flashlightEl.style.display = 'none';
   flashlightOn = false;
   stopTimer();
-  await releaseWakeLock();
-  await exitFullscreen();
+  toggleBtn.textContent = "Zapnout svítilnu";
+  saveState();
 }
 
-toggleBtn.addEventListener('click', async () => {
+// --- Ovládání tlačítek ---
+toggleBtn.addEventListener('click', () => {
   if (batteryTime <= 0) {
     alarmMsg.textContent = "Baterka vybitá! Zadej kód pro nové baterky.";
     return;
   }
   if (flashlightOn) {
-    await turnOffFlashlight();
-    toggleBtn.textContent = "Zapnout svítilnu";
+    turnOffFlashlight();
   } else {
-    await turnOnFlashlight();
-    toggleBtn.textContent = "Vypnout svítilnu";
+    turnOnFlashlight();
   }
   saveState();
 });
@@ -155,7 +85,7 @@ addBatteryBtn.addEventListener('click', () => {
   const code = codeInput.value.trim();
   if (!code) return;
   if (code === "asd") {
-    // Reset alarm flag
+    // Reset alarmu
     alarmTriggered = false;
     alarmMsg.textContent = "Alarm resetován.";
     codeInput.value = "";
@@ -166,7 +96,7 @@ addBatteryBtn.addEventListener('click', () => {
     alarmMsg.textContent = "Nejdřív resetuj alarm zadáním kódu 'asd'.";
     return;
   }
-  // Předpokládáme, že každý jiný kód je platný pro +60 s
+  // Přidání +60 sekund baterky
   batteryTime += 60;
   alarmMsg.textContent = "Baterka přidána +60 s.";
   codeInput.value = "";
@@ -174,14 +104,18 @@ addBatteryBtn.addEventListener('click', () => {
   saveState();
 });
 
-// Uložit stav do localStorage
+// Tlačítko vypnutí na bílé obrazovce fallbacku
+fallbackEl.onclick = () => {
+  turnOffFlashlight();
+};
+
+// --- Uložení a načtení stavu ---
 function saveState() {
   localStorage.setItem('batteryTime', batteryTime);
   localStorage.setItem('flashlightOn', flashlightOn);
   localStorage.setItem('alarmTriggered', alarmTriggered);
 }
 
-// Načíst stav z localStorage
 function loadState() {
   const savedBattery = localStorage.getItem('batteryTime');
   if (savedBattery !== null) batteryTime = parseInt(savedBattery);
@@ -192,7 +126,6 @@ function loadState() {
   updateTimer();
   if (flashlightOn) {
     turnOnFlashlight();
-    toggleBtn.textContent = "Vypnout svítilnu";
   } else {
     toggleBtn.textContent = "Zapnout svítilnu";
   }
@@ -201,7 +134,7 @@ function loadState() {
   }
 }
 
-// Detekce opuštění aplikace - alarmový režim
+// --- Alarmový režim při opuštění appky ---
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     localStorage.setItem("leftAt", Date.now());
@@ -209,34 +142,32 @@ document.addEventListener("visibilitychange", () => {
     const leftAt = localStorage.getItem("leftAt");
     if (leftAt) {
       const awayTime = Date.now() - leftAt;
-      if (awayTime > 3000) { // více než 3s pryč
+      if (awayTime > 3000) { // více než 3 sekundy pryč
         batteryTime -= 30;
         if (batteryTime < 0) batteryTime = 0;
         alarmTriggered = true;
         updateTimer();
         saveState();
+        alarmMsg.textContent = "Opustil jsi aplikaci! Baterka -30 s. Zadej kód 'asd' pro reset.";
 
-        // Přehrát alarm
+        // Spustit alarm (pokud to prohlížeč dovolí)
         alarmSound.currentTime = 0;
         alarmSound.play().catch(() => {});
-
-        alarmMsg.textContent = "Opustil jsi aplikaci! Baterka -30 s. Zadej kód 'asd' pro reset.";
       }
     }
   }
 });
 
-// Blokování gesta pro stažení lišty a scroll
+// --- Blokování scrollu a gesta na mobilu ---
 window.addEventListener('touchmove', function(e) {
   e.preventDefault();
 }, { passive: false });
 
-// Zabránit zoomování (pinch zoom)
 window.addEventListener('gesturestart', function(e) {
   e.preventDefault();
 });
 
-// Při startu načti stav
+// --- Po načtení ---
 window.addEventListener('load', () => {
   loadState();
   updateTimer();
