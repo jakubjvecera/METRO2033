@@ -1,44 +1,186 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metro 2033 Terminál</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="manifest" href="manifest.json">
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Metro Terminal — Kódy</title>
+  <style>
+    :root{
+      --bg:#050505;
+      --panel:#0e0e0e;
+      --accent:#8b0000;
+      --green:#00ff66;
+      --text:#d8d8d8;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+    }
+    *{box-sizing:border-box}
+    html,body,#app{height:100%;margin:0;padding:0}
+    body{
+      background: linear-gradient(180deg, #050505 0%, #0b0b0b 100%);
+      color:var(--text);
+      font-family: var(--mono);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+    }
+    #app{
+      width:100%;
+      max-width:900px;
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+    .topbar{
+      height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:8px 12px;
+      background: linear-gradient(90deg, rgba(20,20,20,0.9), rgba(10,10,10,0.85));
+      border-bottom:2px solid rgba(139,0,0,0.6);
+      box-shadow:0 2px 8px rgba(0,0,0,0.6);
+    }
+    .brand{display:flex;align-items:center;gap:10px;font-size:14px}
+    .lamp{
+      width:14px;height:14px;border-radius:50%;
+      background:linear-gradient(180deg,var(--green),#88ff9a);
+      box-shadow:0 0 8px rgba(0,255,102,0.12), inset 0 -2px 4px rgba(0,0,0,0.5);
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    .status{font-size:13px;color:#cfcfcf;display:flex;gap:8px;align-items:center}
+    .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+    .dot.red{background:var(--accent);box-shadow:0 0 8px rgba(139,0,0,0.3)}
+    #center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
+    .big-title{font-size:42px;letter-spacing:3px;color:#bfbfbf}
+    .subtitle{font-size:13px;color:#9a9a9a;margin-bottom:18px}
+    #console{
+      width:92%;
+      max-width:760px;
+      background:linear-gradient(180deg, rgba(0,0,0,0.55), rgba(10,10,10,0.45));
+      border:1px solid rgba(80,80,80,0.3);
+      padding:10px;
+      margin-top:12px;
+      box-shadow: inset 0 0 24px rgba(0,0,0,0.6);
+      border-left:6px solid var(--accent);
+    }
+    .console-title{font-size:12px;color:#bdbdbd;margin-bottom:6px}
+    #history{list-style:none;margin:0;padding:0;max-height:180px;overflow:auto}
+    #history li{padding:6px 8px;border-bottom:1px dashed rgba(255,255,255,0.03);font-size:13px;color:var(--green)}
+    #code-form{
+      display:flex;
+      gap:8px;
+      padding:10px;
+      background:linear-gradient(180deg,#070707,#0b0b0b);
+      border-top:3px solid rgba(139,0,0,0.6);
+    }
+    #code-input{
+      flex:1;
+      padding:12px 14px;
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.06);
+      color:var(--green);
+      font-size:16px;
+      outline:none;
+      box-shadow: inset 0 -14px 30px rgba(0,0,0,0.5);
+      caret-color: #fff;
+    }
+    #code-input::placeholder{color:rgba(0,255,102,0.18)}
+    #code-submit{
+      padding:10px 16px;
+      background:linear-gradient(180deg,#220000,var(--accent));
+      color:#fff;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      letter-spacing:1px;
+    }
+    #code-submit:active{transform:translateY(1px)}
+    @media (max-width:420px){
+      .big-title{font-size:28px}
+      #console{width:96%}
+    }
+  </style>
 </head>
 <body>
+  <main id="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="lamp"></div>
+        <span>TERMINÁL • STANICE</span>
+      </div>
+      <div class="status">
+        <span class="dot red"></span><span>OFFLINE</span>
+      </div>
+    </header>
 
-    <!-- Horní panel -->
-    <div id="toolbar">
-        <button id="flashlight-btn" title="Svítilna">
-            <img src="icons/flashlight.png" alt="Svítilna">
-        </button>
-        <button id="map-btn" title="Mapa">
-            <img src="icons/map.png" alt="Mapa">
-        </button>
-    </div>
+    <section id="center">
+      <div class="big-title">METRO 2033</div>
+      <div class="subtitle">Terminál kódů</div>
 
-    <!-- Hlavní obsah -->
-    <div id="content">
-        <h1>METRO 2033 – TERMINÁL</h1>
-        <p>Vyber nástroj nahoře.</p>
-    </div>
+      <div id="console">
+        <div class="console-title">Historie kódů</div>
+        <ul id="history"></ul>
+      </div>
+    </section>
 
-    <!-- Vstup kódů -->
-    <div id="code-bar">
-        <input type="text" id="code-input" placeholder="Zadej kód..." />
-        <button id="code-submit">OK</button>
-    </div>
+    <form id="code-form" autocomplete="off">
+      <input id="code-input" name="code" type="text" maxlength="40" placeholder="Zadej kód..." aria-label="Zadej kód" />
+      <button id="code-submit" type="submit">OK</button>
+    </form>
+  </main>
 
-    <!-- Svítilna -->
-    <div id="flashlight-screen">
-        <span id="timer"></span>
-        <div id="noise"></div>
-    </div>
+  <script>
+    const form = document.getElementById('code-form');
+    const input = document.getElementById('code-input');
+    const hist = document.getElementById('history');
+    const STORAGE_KEY = 'metro_codes_history_v1';
 
-    <script src="app.js"></script>
+    function loadHistory(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return [];
+      try { return JSON.parse(raw); } catch(e){ return []; }
+    }
+    function saveHistory(arr){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    }
+    function renderHistory(){
+      const list = loadHistory();
+      hist.innerHTML = '';
+      if(list.length === 0){
+        const li = document.createElement('li');
+        li.textContent = '(Žádné kódy)';
+        li.style.color = '#9a9a9a';
+        hist.appendChild(li);
+        return;
+      }
+      list.slice().reverse().forEach(item=>{
+        const li = document.createElement('li');
+        const time = new Date(item.t).toLocaleTimeString();
+        li.textContent = \`\${item.code} — \${time}\`;
+        hist.appendChild(li);
+      });
+    }
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const code = input.value.trim();
+      if(!code) return;
+      const list = loadHistory();
+      list.push({ code: code.toUpperCase(), t: Date.now() });
+      saveHistory(list);
+      renderHistory();
+      input.value = '';
+      input.focus();
+      flashSubmit();
+    });
+    function flashSubmit(){
+      const b = document.getElementById('code-submit');
+      b.style.transform = 'scale(0.98)';
+      setTimeout(()=> b.style.transform = '', 120);
+    }
+    renderHistory();
+    input.focus();
+  </script>
 </body>
 </html>
-
