@@ -52,6 +52,34 @@
     .status{font-size:13px;color:#cfcfcf;display:flex;gap:8px;align-items:center}
     .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
     .dot.red{background:var(--accent);box-shadow:0 0 8px rgba(139,0,0,0.3)}
+
+    /* Nová tlačítka */
+    .top-buttons{
+      display:flex;
+      gap:8px;
+    }
+    .top-btn{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      background:linear-gradient(180deg,#1a1a1a,#0d0d0d);
+      border:1px solid rgba(255,255,255,0.05);
+      color:#ccc;
+      font-size:13px;
+      cursor:pointer;
+      transition:all 0.15s ease;
+      box-shadow:inset 0 0 8px rgba(0,0,0,0.4);
+    }
+    .top-btn:hover{
+      background:linear-gradient(180deg,#262626,#121212);
+      color:#fff;
+      border-color:rgba(255,255,255,0.12);
+    }
+    .top-btn:active{
+      transform:translateY(1px);
+    }
+
     #center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
     .big-title{font-size:42px;letter-spacing:3px;color:#bfbfbf}
     .subtitle{font-size:13px;color:#9a9a9a;margin-bottom:18px}
@@ -100,6 +128,8 @@
     @media (max-width:420px){
       .big-title{font-size:28px}
       #console{width:96%}
+      .top-buttons{gap:4px}
+      .top-btn{padding:5px 8px;font-size:12px}
     }
   </style>
 </head>
@@ -110,6 +140,12 @@
         <div class="lamp"></div>
         <span>TERMINÁL • STANICE</span>
       </div>
+
+      <div class="top-buttons">
+        <button class="top-btn">🔦 Svítilna</button>
+        <button class="top-btn">🗺️ Mapa</button>
+      </div>
+
       <div class="status">
         <span class="dot red"></span><span>OFFLINE</span>
       </div>
