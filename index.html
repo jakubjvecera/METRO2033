@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Metro 2033 Svítilna</title>
 
-<!-- PWA manifest -->
 <link rel="manifest" href="manifest.json" />
 
 <style>
@@ -42,10 +41,11 @@
 <button id="addBatteryBtn">Najít baterku (+60 s)</button>
 <div id="time">Čas: 60 s</div>
 
-<!-- Bílé plátno pro svícení na iOS -->
 <div id="flashlight-screen"></div>
 
 <script>
+  const BATTERY_CODE = "METRO123"; // kód pro přidání baterky - změň si podle potřeby
+
   let remainingTime = parseInt(localStorage.getItem("remainingTime")) || 60;
   let flashlightOn = (localStorage.getItem("flashlightOn") === "true") || false;
   let timerInterval = null;
@@ -53,7 +53,6 @@
   const timeDisplay = document.getElementById("time");
   const toggleBtn = document.getElementById("toggleBtn");
 
-  // Pokus o zapnutí blesku (LED) na Androidu
   let stream = null;
   let track = null;
   async function turnOnPhysicalFlashlight() {
@@ -107,10 +106,10 @@
     }
     flashlightOn = true;
     localStorage.setItem("flashlightOn", "true");
-    // Zkus LED blesk, pokud nefunguje, rozsvítí bílou obrazovku
+
     const ledOn = await turnOnPhysicalFlashlight();
     if (!ledOn) {
-      flashlightScreen.style.display = "block"; // iOS fallback - bílá obrazovka
+      flashlightScreen.style.display = "block";
     }
     toggleBtn.textContent = "Vypnout svítilnu";
     startTimer();
@@ -134,10 +133,15 @@
   }
 
   function addBattery() {
-    remainingTime += 60;
-    localStorage.setItem("remainingTime", remainingTime);
-    updateDisplay();
-    alert("Baterka přidána +60 sekund!");
+    const code = prompt("Zadej kód pro baterku:");
+    if (code === BATTERY_CODE) {
+      remainingTime += 60;
+      localStorage.setItem("remainingTime", remainingTime);
+      updateDisplay();
+      alert("Baterka přidána +60 sekund!");
+    } else {
+      alert("Špatný kód!");
+    }
   }
 
   function updateDisplay() {
