@@ -1,10 +1,10 @@
 {
-  "name": "Metro 2033 Game",
+  "name": "Metro 2033 Terminál",
   "short_name": "Metro2033",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#111",
-  "theme_color": "#222",
+  "background_color": "#000000",
+  "theme_color": "#550000",
   "icons": [
     {
       "src": "icons/icon-192.png",
