@@ -1,297 +1,159 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"> 
-  <title>Metro svítilna (PWA)</title>
-  <meta name="description" content="Jednoduchá offline PWA svítilna pro LARP - 60s svícení, doplnění kódem">
-  <style>
-    :root{--bg:#0b0b0c;--accent:#b3ff9e;--muted:#999}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#fff;background:var(--bg)}
-    .app{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:20px;box-sizing:border-box}
-    h1{margin:0 0 8px;font-size:20px}
-    .status{margin-bottom:16px;color:var(--muted)}
-    .controls{display:flex;gap:12px}
-    button{background:transparent;border:2px solid var(--accent);color:var(--accent);padding:12px 18px;border-radius:10px;font-weight:700;font-size:16px}
-    button.secondary{border-color:#666;color:#ccc}
-    .timer{font-size:48px;margin:18px 0;font-variant-numeric:tabular-nums}
-    .overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center}
-    .white-screen{position:absolute;inset:0;background:#fff;display:flex;align-items:center;justify-content:center}
-    .depleted{background:rgba(0,0,0,0.85);padding:20px;border-radius:12px;max-width:360px;text-align:center}
-    input[type=text]{width:100%;padding:10px;margin-top:10px;border-radius:8px;border:1px solid #444;background:#111;color:#fff}
-    .hint{font-size:12px;color:#888;margin-top:8px}
-    footer{position:fixed;left:12px;right:12px;bottom:12px;text-align:center;color:#666;font-size:12px}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Metro 2033 Svítilna</title>
+
+<!-- PWA manifest -->
+<link rel="manifest" href="manifest.json" />
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 2rem;
+    background: black;
+    color: white;
+  }
+  #flashlight-screen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: white;
+    display: none;
+    z-index: 9999;
+  }
+  button {
+    font-size: 1.2rem;
+    margin: 1rem;
+    padding: 1rem 2rem;
+    cursor: pointer;
+  }
+  #time {
+    font-size: 2rem;
+    margin-top: 2rem;
+  }
+</style>
 </head>
 <body>
-  <div class="app" id="app">
-    <h1>Metro — Svítilna</h1>
-    <div class="status" id="status">Gotová. Maximální čas svícení: <strong>60 s</strong>.</div>
-    <div class="timer" id="timer">01:00</div>
-    <div class="controls">
-      <button id="toggleBtn">Zapnout svítilnu</button>
-      <button id="rechargeBtn" class="secondary">Doplnit baterky</button>
-    </div>
-    <div class="hint">Po vyčerpání baterie zadejte kód od organizátora.</div>
-  </div>
 
-  <!-- Fullscreen white screen fallback pro zařízení bez ovládání blesku -->
-  <div id="overlay" class="overlay">
-    <div class="white-screen" id="whiteScreen" style="display:none"></div>
-  </div>
+<h1>Metro 2033 - Svítilna</h1>
+<button id="toggleBtn">Zapnout svítilnu</button>
+<button id="addBatteryBtn">Najít baterku (+60 s)</button>
+<div id="time">Čas: 60 s</div>
 
-  <!-- Depleted modal -->
-  <div id="depletedModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;display:flex">
-    <div class="depleted">
-      <div style="font-size:18px;font-weight:700">Baterie vybitá</div>
-      <div style="margin-top:8px;color:#bbb">Pro opětovné zapnutí zadejte kód od organizátora.</div>
-      <input id="codeInput" type="text" placeholder="Zadejte kód" autocomplete="off">
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button id="submitCode">Odeslat kód</button>
-        <button id="cancelCode" class="secondary">Zavřít</button>
-      </div>
-      <div class="hint">Výchozí kód je <strong>METRO2025</strong> — změňte v nastavení organizátora.</div>
-    </div>
-  </div>
-
-  <footer>Funguje offline jako PWA. Best on Android/Chrome (torch API). iOS použije bílou obrazovku.</footer>
+<!-- Bílé plátno pro svícení na iOS -->
+<div id="flashlight-screen"></div>
 
 <script>
-// ======== KONFIGURACE (organizátor může změnit) ========
-const TOTAL_SECONDS = 60;            // kolik sekund svítí po nabití
-const RECHARGE_CODE = 'METRO2025';   // výchozí kód na papírek
-// =======================================================
+  let remainingTime = parseInt(localStorage.getItem("remainingTime")) || 60;
+  let flashlightOn = (localStorage.getItem("flashlightOn") === "true") || false;
+  let timerInterval = null;
+  const flashlightScreen = document.getElementById("flashlight-screen");
+  const timeDisplay = document.getElementById("time");
+  const toggleBtn = document.getElementById("toggleBtn");
 
-// Stav uložený v localStorage -> přežije refresh
-const LS_KEY = 'metro_flashlight_state_v1';
-
-let state = {
-  remaining: TOTAL_SECONDS,
-  isOn: false,
-  depleted: false,
-  lastUsedTs: 0
-};
-
-// UI
-const toggleBtn = document.getElementById('toggleBtn');
-const rechargeBtn = document.getElementById('rechargeBtn');
-const timerEl = document.getElementById('timer');
-const statusEl = document.getElementById('status');
-const overlay = document.getElementById('overlay');
-const whiteScreen = document.getElementById('whiteScreen');
-const depletedModal = document.getElementById('depletedModal');
-const codeInput = document.getElementById('codeInput');
-const submitCode = document.getElementById('submitCode');
-const cancelCode = document.getElementById('cancelCode');
-
-// camera / torch
-let stream = null;
-let track = null;
-let supportsTorch = false;
-let timerInterval = null;
-
-function loadState(){
-  try{
-    const s = localStorage.getItem(LS_KEY);
-    if(s) state = JSON.parse(s);
-  }catch(e){console.warn('Load state failed',e)}
-}
-function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
-}
-
-function formatTime(s){
-  const mm = Math.floor(s/60).toString().padStart(2,'0');
-  const ss = (s%60).toString().padStart(2,'0');
-  return `${mm}:${ss}`;
-}
-
-async function initTorch(){
-  // try to open back camera and check torch support
-  try{
-    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-    track = stream.getVideoTracks()[0];
-    const capabilities = track.getCapabilities();
-    supportsTorch = !!capabilities.torch;
-    console.log('Torch supported?',supportsTorch, capabilities);
-    // if torch unsupported, we'll use white-screen fallback
-    if(!supportsTorch){
-      stopCamera();
-    }
-  }catch(e){
-    console.log('Camera init failed (fallback to white screen)',e);
-    supportsTorch = false;
-    stopCamera();
-  }
-}
-
-function stopCamera(){
-  if(track) { track.stop(); track=null; }
-  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
-}
-
-async function setTorch(on){
-  if(supportsTorch && track){
-    try{
-      await track.applyConstraints({advanced:[{torch:on}]});
+  // Pokus o zapnutí blesku (LED) na Androidu
+  let stream = null;
+  let track = null;
+  async function turnOnPhysicalFlashlight() {
+    if (!('mediaDevices' in navigator) || !('getUserMedia' in navigator.mediaDevices)) return false;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      track = stream.getVideoTracks()[0];
+      await track.applyConstraints({ advanced: [{ torch: true }] });
       return true;
-    }catch(e){ console.warn('Torch apply failed',e); supportsTorch=false; stopCamera(); }
+    } catch (e) {
+      return false;
+    }
   }
-  // fallback: white full-screen
-  whiteScreen.style.display = on? 'block':'none';
-  overlay.style.display = on? 'flex':'none';
-  return false;
-}
 
-function startTimer(){
-  if(timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(()=>{
-    if(state.isOn && !state.depleted){
-      state.remaining = Math.max(0, state.remaining-1);
-      timerEl.textContent = formatTime(state.remaining);
-      if(state.remaining <= 0){
-        // battery depleted
-        state.depleted = true;
-        state.isOn = false;
-        state.lastUsedTs = Date.now();
-        saveState();
-        stopTorchAndShowDepleted();
-      } else if(state.remaining <= 10){
-        // small blink hint in last seconds
-        if(!supportsTorch) {
-          // flash the white screen for a fraction
-          whiteScreen.style.opacity = (state.remaining % 2) ? '1' : '0.4';
+  function turnOffPhysicalFlashlight() {
+    if (track) {
+      track.applyConstraints({ advanced: [{ torch: false }] });
+      track.stop();
+      track = null;
+    }
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+  }
+
+  function startTimer() {
+    if (timerInterval) return;
+    timerInterval = setInterval(() => {
+      if (remainingTime > 0) {
+        remainingTime--;
+        localStorage.setItem("remainingTime", remainingTime);
+        updateDisplay();
+        if (remainingTime === 0) {
+          alert("Vyčerpal jsi baterii, potřebuješ novou!");
+          turnOffFlashlight();
         }
       }
-      saveState();
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  async function turnOnFlashlight() {
+    if (remainingTime <= 0) {
+      alert("Nemáš baterii, najdi novou!");
+      return;
     }
-  },1000);
-}
-
-async function stopTorchAndShowDepleted(){
-  await setTorch(false);
-  updateUI();
-  showDepletedModal();
-}
-
-function showDepletedModal(){
-  depletedModal.style.display = 'flex';
-  codeInput.value='';
-  codeInput.focus();
-}
-function hideDepletedModal(){ depletedModal.style.display='none'; }
-
-function updateUI(){
-  timerEl.textContent = formatTime(state.remaining);
-  if(state.depleted){
-    statusEl.textContent = 'Baterie vybitá — vyžadován kód.';
-    toggleBtn.disabled = true;
-  } else {
-    statusEl.textContent = state.isOn? 'Svítilna zapnutá' : 'Svítilna vypnutá';
-    toggleBtn.disabled = false;
-  }
-  toggleBtn.textContent = state.isOn? 'Vypnout svítilnu' : 'Zapnout svítilnu';
-}
-
-// event handlers
-toggleBtn.addEventListener('click', async ()=>{
-  if(state.depleted) return showDepletedModal();
-  if(!state.isOn){
-    // try to init camera/torch when turning on
-    if(stream==null && 'mediaDevices' in navigator){
-      await initTorch();
+    flashlightOn = true;
+    localStorage.setItem("flashlightOn", "true");
+    // Zkus LED blesk, pokud nefunguje, rozsvítí bílou obrazovku
+    const ledOn = await turnOnPhysicalFlashlight();
+    if (!ledOn) {
+      flashlightScreen.style.display = "block"; // iOS fallback - bílá obrazovka
     }
-    const ok = await setTorch(true);
-    state.isOn = true;
-    state.lastUsedTs = Date.now();
-    saveState();
-    updateUI();
-  } else {
-    await setTorch(false);
-    state.isOn = false;
-    saveState();
-    updateUI();
+    toggleBtn.textContent = "Vypnout svítilnu";
+    startTimer();
   }
-});
 
-rechargeBtn.addEventListener('click', ()=>{
-  // quick recharge dialog
-  showDepletedModal();
-});
-
-submitCode.addEventListener('click', ()=>{
-  const v = (codeInput.value||'').trim();
-  if(!v) return;
-  if(v === RECHARGE_CODE){
-    state.remaining = TOTAL_SECONDS;
-    state.depleted = false;
-    state.isOn = false;
-    hideDepletedModal();
-    saveState();
-    updateUI();
-    alert('Baterie doplněny — 60 s k dispozici');
-  } else {
-    alert('Špatný kód.');
+  function turnOffFlashlight() {
+    flashlightOn = false;
+    localStorage.setItem("flashlightOn", "false");
+    turnOffPhysicalFlashlight();
+    flashlightScreen.style.display = "none";
+    toggleBtn.textContent = "Zapnout svítilnu";
+    stopTimer();
   }
-});
-cancelCode.addEventListener('click', ()=>{ hideDepletedModal(); });
 
-// save on visibility change: if user backgrounds app while torch on, we will mark as depleted
-document.addEventListener('visibilitychange', ()=>{
-  if(document.hidden && state.isOn){
-    // trest: pokud schovají app, vybijeme baterie (organizátoři chtějí, aby to bylo riziko)
-    state.remaining = 0;
-    state.depleted = true;
-    state.isOn = false;
-    saveState();
-    stopTorchAndShowDepleted();
-  }
-});
-
-// init
-(function boot(){
-  loadState();
-  updateUI();
-  startTimer();
-
-  // create and register manifest & service worker dynamically so this single-file can be used as PWA
-  try{
-    // manifest
-    const manifest = {
-      name: 'Metro Svítilna',
-      short_name: 'Svítilna',
-      start_url: '.',
-      display: 'standalone',
-      background_color: '#000000',
-      theme_color: '#0b0b0c',
-      icons: [{src:'icon-192.png',sizes:'192x192',type:'image/png'}]
-    };
-    const mBlob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
-    const mURL = URL.createObjectURL(mBlob);
-    const link = document.createElement('link');
-    link.rel = 'manifest';
-    link.href = mURL;
-    document.head.appendChild(link);
-
-    // service worker code (simple cache-first)
-    const swCode = `
-      const CACHE = 'metro-svitilna-cache-v1';
-      self.addEventListener('install', e => {
-        self.skipWaiting();
-        e.waitUntil(caches.open(CACHE).then(c => c.addAll(['.'])));
-      });
-      self.addEventListener('fetch', e => {
-        e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
-      });
-    `;
-    const swBlob = new Blob([swCode],{type:'text/javascript'});
-    const swURL = URL.createObjectURL(swBlob);
-    if('serviceWorker' in navigator){
-      navigator.serviceWorker.register(swURL).then(()=>console.log('SW registered')).catch(e=>console.warn('SW failed',e));
+  function toggleFlashlight() {
+    if (flashlightOn) {
+      turnOffFlashlight();
+    } else {
+      turnOnFlashlight();
     }
-  }catch(e){ console.warn('PWA dynamic registration failed',e); }
+  }
 
-})();
+  function addBattery() {
+    remainingTime += 60;
+    localStorage.setItem("remainingTime", remainingTime);
+    updateDisplay();
+    alert("Baterka přidána +60 sekund!");
+  }
+
+  function updateDisplay() {
+    timeDisplay.textContent = `Čas: ${remainingTime} s`;
+  }
+
+  toggleBtn.addEventListener("click", toggleFlashlight);
+  document.getElementById("addBatteryBtn").addEventListener("click", addBattery);
+
+  window.addEventListener("load", () => {
+    updateDisplay();
+    if (flashlightOn && remainingTime > 0) {
+      turnOnFlashlight();
+    }
+  });
 </script>
+
 </body>
 </html>
