@@ -2,62 +2,101 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<title>PWA Svítilna Metro 2033</title>
-<link rel="manifest" href="manifest.json" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Flashlight simulátor</title>
 <style>
   body {
-    margin: 0; background: black; color: white;
+    margin: 0;
     font-family: Arial, sans-serif;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    height: 100vh;
-    user-select: none;
-    -webkit-user-select:none;
-    -webkit-touch-callout:none;
-  }
-  #timer {
-    font-size: 5em;
-    margin-bottom: 1rem;
-    letter-spacing: 0.1em;
-  }
-  button, input {
-    font-size: 1.5em;
-    margin: 0.5rem;
-    padding: 0.5rem 1rem;
+    text-align: center;
+    padding: 2rem;
   }
   #flashlight {
-    width: 120px; height: 120px;
-    border-radius: 50%;
-    background: white;
-    box-shadow: 0 0 40px 20px white;
-    margin-bottom: 1rem;
     display: none;
-  }
-  #fallback {
     position: fixed;
-    top:0; left:0; right:0; bottom:0;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
     background: white;
-    display: none;
-    z-index: 9999;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
   }
-  #alarmMsg {
-    color: red;
-    font-weight: bold;
-    margin-top: 1rem;
+  button {
+    font-size: 1.5rem;
+    padding: 1rem 2rem;
+    margin: 1rem;
+    cursor: pointer;
+  }
+  #timer {
+    font-size: 2rem;
+    margin-top: 2rem;
   }
 </style>
 </head>
 <body>
-  <div id="timer">00:30</div>
-  <button id="toggleBtn">Zapnout svítilnu</button>
-  <input type="text" id="codeInput" placeholder="Zadej kód pro baterku" autocomplete="off" />
-  <button id="addBatteryBtn">Přidat baterku</button>
-  <div id="alarmMsg"></div>
-  <div id="flashlight" style="display:none; position: fixed; top:0; left:0; width:100vw; height:100vh; background:white; z-index:1000; display:flex; justify-content:center; align-items:center; flex-direction: column;">
-  <button id="offBtn" style="font-size: 2rem; padding: 1rem 2rem; cursor:pointer;">Vypnout svítilnu</button>
-</div>
-  <div id="fallback"></div>
 
-<script src="app.js"></script>
+<button id="toggleBtn">Zapnout svítilnu</button>
+
+<div id="flashlight">
+  <button id="offBtn">Vypnout svítilnu</button>
+</div>
+
+<div id="timer">60 s</div>
+
+<script>
+  const toggleBtn = document.getElementById("toggleBtn");
+  const flashlight = document.getElementById("flashlight");
+  const offBtn = document.getElementById("offBtn");
+  const timerEl = document.getElementById("timer");
+
+  let flashlightOn = false;
+  let timeLeft = 60; // v sekundách
+  let timerInterval = null;
+
+  function startTimer() {
+    timerEl.textContent = `${timeLeft} s`;
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      timerEl.textContent = `${timeLeft} s`;
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        alert("Baterky došly, potřeba doplnit kódem!");
+        turnOffFlashlight();
+      }
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+  }
+
+  function turnOnFlashlight() {
+    if (flashlightOn) return;
+    flashlight.style.display = "flex";
+    flashlightOn = true;
+    toggleBtn.style.display = "none";
+    startTimer();
+  }
+
+  function turnOffFlashlight() {
+    if (!flashlightOn) return;
+    flashlight.style.display = "none";
+    flashlightOn = false;
+    toggleBtn.style.display = "inline-block";
+    stopTimer();
+  }
+
+  toggleBtn.addEventListener("click", () => {
+    turnOnFlashlight();
+  });
+
+  offBtn.addEventListener("click", () => {
+    turnOffFlashlight();
+  });
+</script>
+
 </body>
 </html>
