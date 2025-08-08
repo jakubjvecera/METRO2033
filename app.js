@@ -49,8 +49,7 @@ function startTimer() {
 // --- Simulovaná svítilna (pouze bílá obrazovka) ---
 function turnOnFlashlight() {
   if (flashlightOn) return;
-  fallbackEl.style.display = 'block'; // zobraz bílou obrazovku
-  flashlightEl.style.display = 'block'; // zobraz celou obrazovku s bílým pozadím
+  flashlightEl.style.display = 'flex'; // zobraz bílou obrazovku
   flashlightOn = true;
   alarmMsg.textContent = "";
   startTimer();
@@ -59,14 +58,12 @@ function turnOnFlashlight() {
 
 function turnOffFlashlight() {
   if (!flashlightOn) return;
-  fallbackEl.style.display = 'none';
   flashlightEl.style.display = 'none';
   flashlightOn = false;
   stopTimer();
   toggleBtn.textContent = "Zapnout svítilnu";
   saveState();
 }
-
 // --- Ovládání tlačítek ---
 toggleBtn.addEventListener('click', () => {
   if (batteryTime <= 0) {
