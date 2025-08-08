@@ -1,22 +1,23 @@
-const cacheName = 'metro-svitilna-v1';
-const assetsToCache = [
-  '.',
-  'index.html',
-  'app.js',
-  'manifest.json',
-  'alarm.mp3',
-  'icon-192.png',
-  'icon-512.png'
+const CACHE_NAME = "metro-cache-v1";
+const urlsToCache = [
+  "/",
+  "/index.html",
+  "/styles.css",
+  "/app.js",
+  "/manifest.json",
+  "/images/mapa.png",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png"
 ];
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(cacheName).then(cache => cache.addAll(assetsToCache))
+self.addEventListener("install", event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
 });
 
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(response => response || fetch(e.request))
+self.addEventListener("fetch", event => {
+  event.respondWith(
+    caches.match(event.request).then(response => response || fetch(event.request))
   );
 });
