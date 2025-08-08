@@ -51,7 +51,9 @@ flashlightBtn.addEventListener("click", () => {
 
 // Mapa
 mapBtn.addEventListener("click", () => {
-    content.innerHTML = `<img src="images/mapa.png" style="width:100%;">`;
+    content.innerHTML = `<div style="border:4px solid #550000;padding:5px;background:#111;">
+        <img src="images/mapa.png" style="width:100%;border:2px solid #333;">
+    </div>`;
 });
 
 // Zadání kódu
