@@ -1,105 +1,37 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Simulátor svítilny</title>
-<style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 2rem;
-  }
-  #flashlight {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: white;
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-  }
-  button {
-    font-size: 1.5rem;
-    padding: 1rem 2rem;
-    margin: 1rem;
-    cursor: pointer;
-  }
-  #timer {
-    font-size: 2rem;
-    margin-top: 2rem;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metro 2033 App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
 
-<button id="toggleBtn">Zapnout svítilnu</button>
+    <!-- Horní panel s nástroji -->
+    <div id="toolbar">
+        <button id="flashlight-btn">🔦</button>
+        <button id="map-btn">🗺️</button>
+    </div>
 
-<div id="flashlight">
-  <button id="offBtn">Vypnout svítilnu</button>
-</div>
+    <!-- Hlavní obsah -->
+    <div id="content">
+        <h1>Metro 2033</h1>
+        <p>Vyber nástroj nahoře.</p>
+    </div>
 
-<div id="timer">60 s</div>
+    <!-- Vstup kódů -->
+    <div id="code-bar">
+        <input type="text" id="code-input" placeholder="Zadej kód..." />
+        <button id="code-submit">OK</button>
+    </div>
 
-<script>
-  const toggleBtn = document.getElementById("toggleBtn");
-  const flashlight = document.getElementById("flashlight");
-  const offBtn = document.getElementById("offBtn");
-  const timerEl = document.getElementById("timer");
+    <!-- Svítilna (skrytá) -->
+    <div id="flashlight-screen">
+        <span id="timer"></span>
+    </div>
 
-  let flashlightOn = false;
-  let timeLeft = 60; // sekundy
-  let timerInterval = null;
-
-  function startTimer() {
-    timerEl.textContent = `${timeLeft} s`;
-    timerInterval = setInterval(() => {
-      timeLeft--;
-      timerEl.textContent = `${timeLeft} s`;
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        alert("Baterky došly, potřeba doplnit kódem!");
-        turnOffFlashlight();
-      }
-    }, 1000);
-  }
-
-  function stopTimer() {
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-    }
-  }
-
-  function turnOnFlashlight() {
-    if (flashlightOn) return;
-    flashlight.style.display = "flex";
-    toggleBtn.style.display = "none";
-    flashlightOn = true;
-    startTimer();
-  }
-
-  function turnOffFlashlight() {
-    if (!flashlightOn) return;
-    flashlight.style.display = "none";
-    toggleBtn.style.display = "inline-block";
-    flashlightOn = false;
-    stopTimer();
-  }
-
-  toggleBtn.addEventListener("click", () => {
-    turnOnFlashlight();
-  });
-
-  offBtn.addEventListener("click", () => {
-    turnOffFlashlight();
-  });
-</script>
-
+    <script src="app.js"></script>
 </body>
 </html>
