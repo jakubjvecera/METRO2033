@@ -2,176 +2,60 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Metro 2033 Svítilna</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>PWA Svítilna Metro 2033</title>
 <link rel="manifest" href="manifest.json" />
-
 <style>
   body {
+    margin: 0; background: black; color: white;
     font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 2rem;
-    background: black;
-    color: white;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100vh;
+    user-select: none;
+    -webkit-user-select:none;
+    -webkit-touch-callout:none;
   }
-  #flashlight-screen {
+  #timer {
+    font-size: 5em;
+    margin-bottom: 1rem;
+    letter-spacing: 0.1em;
+  }
+  button, input {
+    font-size: 1.5em;
+    margin: 0.5rem;
+    padding: 0.5rem 1rem;
+  }
+  #flashlight {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 0 40px 20px white;
+    margin-bottom: 1rem;
+    display: none;
+  }
+  #fallback {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top:0; left:0; right:0; bottom:0;
     background: white;
     display: none;
     z-index: 9999;
   }
-  #flashlight-screen button {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    font-size: 1.5rem;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-  }
-  button {
-    font-size: 1.2rem;
-    margin: 1rem;
-    padding: 1rem 2rem;
-    cursor: pointer;
-  }
-  #time {
-    font-size: 2rem;
-    margin-top: 2rem;
+  #alarmMsg {
+    color: red;
+    font-weight: bold;
+    margin-top: 1rem;
   }
 </style>
 </head>
 <body>
+  <div id="timer">00:30</div>
+  <button id="toggleBtn">Zapnout svítilnu</button>
+  <input type="text" id="codeInput" placeholder="Zadej kód pro baterku" autocomplete="off" />
+  <button id="addBatteryBtn">Přidat baterku</button>
+  <div id="alarmMsg"></div>
+  <div id="flashlight"></div>
+  <div id="fallback"></div>
 
-<h1>Metro 2033 - Svítilna</h1>
-<button id="toggleBtn">Zapnout svítilnu</button>
-<button id="addBatteryBtn">Najít baterku (+60 s)</button>
-<div id="time">Čas: 60 s</div>
-
-<div id="flashlight-screen">
-  <button id="offFlashlightBtn">Vypnout svítilnu</button>
-</div>
-
-<script>
-  const BATTERY_CODE = "METRO123"; // kód pro přidání baterky - změň si podle potřeby
-
-  let remainingTime = parseInt(localStorage.getItem("remainingTime")) || 60;
-  let flashlightOn = (localStorage.getItem("flashlightOn") === "true") || false;
-  let timerInterval = null;
-  const flashlightScreen = document.getElementById("flashlight-screen");
-  const timeDisplay = document.getElementById("time");
-  const toggleBtn = document.getElementById("toggleBtn");
-  const offFlashlightBtn = document.getElementById("offFlashlightBtn");
-
-  let stream = null;
-  let track = null;
-  async function turnOnPhysicalFlashlight() {
-    if (!('mediaDevices' in navigator) || !('getUserMedia' in navigator.mediaDevices)) return false;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-      track = stream.getVideoTracks()[0];
-      await track.applyConstraints({ advanced: [{ torch: true }] });
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  function turnOffPhysicalFlashlight() {
-    if (track) {
-      track.applyConstraints({ advanced: [{ torch: false }] });
-      track.stop();
-      track = null;
-    }
-    if (stream) {
-      stream.getTracks().forEach(t => t.stop());
-      stream = null;
-    }
-  }
-
-  function startTimer() {
-    if (timerInterval) return;
-    timerInterval = setInterval(() => {
-      if (remainingTime > 0) {
-        remainingTime--;
-        localStorage.setItem("remainingTime", remainingTime);
-        updateDisplay();
-        if (remainingTime === 0) {
-          alert("Vyčerpal jsi baterii, potřebuješ novou!");
-          turnOffFlashlight();
-        }
-      }
-    }, 1000);
-  }
-
-  function stopTimer() {
-    clearInterval(timerInterval);
-    timerInterval = null;
-  }
-
-  async function turnOnFlashlight() {
-    if (remainingTime <= 0) {
-      alert("Nemáš baterii, najdi novou!");
-      return;
-    }
-    flashlightOn = true;
-    localStorage.setItem("flashlightOn", "true");
-
-    const ledOn = await turnOnPhysicalFlashlight();
-    if (!ledOn) {
-      flashlightScreen.style.display = "block";
-    }
-    toggleBtn.textContent = "Vypnout svítilnu";
-    startTimer();
-  }
-
-  function turnOffFlashlight() {
-    flashlightOn = false;
-    localStorage.setItem("flashlightOn", "false");
-    turnOffPhysicalFlashlight();
-    flashlightScreen.style.display = "none";
-    toggleBtn.textContent = "Zapnout svítilnu";
-    stopTimer();
-  }
-
-  function toggleFlashlight() {
-    if (flashlightOn) {
-      turnOffFlashlight();
-    } else {
-      turnOnFlashlight();
-    }
-  }
-
-  function addBattery() {
-    const code = prompt("Zadej kód pro baterku:");
-    if (code === BATTERY_CODE) {
-      remainingTime += 60;
-      localStorage.setItem("remainingTime", remainingTime);
-      updateDisplay();
-      alert("Baterka přidána +60 sekund!");
-    } else {
-      alert("Špatný kód!");
-    }
-  }
-
-  function updateDisplay() {
-    timeDisplay.textContent = `Čas: ${remainingTime} s`;
-  }
-
-  toggleBtn.addEventListener("click", toggleFlashlight);
-  offFlashlightBtn.addEventListener("click", () => {
-    turnOffFlashlight();
-  });
-  document.getElementById("addBatteryBtn").addEventListener("click", addBattery);
-
-  window.addEventListener("load", () => {
-    updateDisplay();
-    if (flashlightOn && remainingTime > 0) {
-      turnOnFlashlight();
-    }
-  });
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
