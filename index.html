@@ -53,7 +53,9 @@
   <input type="text" id="codeInput" placeholder="Zadej kód pro baterku" autocomplete="off" />
   <button id="addBatteryBtn">Přidat baterku</button>
   <div id="alarmMsg"></div>
-  <div id="flashlight"></div>
+  <div id="flashlight" style="display:none; position: fixed; top:0; left:0; width:100vw; height:100vh; background:white; z-index:1000; display:flex; justify-content:center; align-items:center; flex-direction: column;">
+  <button id="offBtn" style="font-size: 2rem; padding: 1rem 2rem; cursor:pointer;">Vypnout svítilnu</button>
+</div>
   <div id="fallback"></div>
 
 <script src="app.js"></script>
