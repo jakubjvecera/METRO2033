@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Flashlight simulátor</title>
+<title>Simulátor svítilny</title>
 <style>
   body {
     margin: 0;
@@ -53,7 +53,7 @@
   const timerEl = document.getElementById("timer");
 
   let flashlightOn = false;
-  let timeLeft = 60; // v sekundách
+  let timeLeft = 60; // sekundy
   let timerInterval = null;
 
   function startTimer() {
@@ -70,22 +70,25 @@
   }
 
   function stopTimer() {
-    clearInterval(timerInterval);
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
   }
 
   function turnOnFlashlight() {
     if (flashlightOn) return;
     flashlight.style.display = "flex";
-    flashlightOn = true;
     toggleBtn.style.display = "none";
+    flashlightOn = true;
     startTimer();
   }
 
   function turnOffFlashlight() {
     if (!flashlightOn) return;
     flashlight.style.display = "none";
-    flashlightOn = false;
     toggleBtn.style.display = "inline-block";
+    flashlightOn = false;
     stopTimer();
   }
 
