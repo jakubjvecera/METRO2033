@@ -223,15 +223,10 @@
       });
     }
 
-    // zobrazení statusu (stav baterií atd.)
-    function updateStatus(){
-      statusMsg.textContent = `Baterie: ${batteryCount}`;
-    }
-
     // akce podle kódu
     function performAction(codeObj){
-      // Pokud je kód U* (user), přidáme baterie (pokud je value)
-      if(codeObj.code.startsWith('U')){
+      // Pokud je kód UB (user), přidáme baterie (pokud je value)
+      if(codeObj.code.startsWith('UB')){
         if(codeObj.value){
           batteryCount += codeObj.value;
           updateStatus();
