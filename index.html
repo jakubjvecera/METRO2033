@@ -53,31 +53,35 @@
     .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
     .dot.red{background:var(--accent);box-shadow:0 0 8px rgba(139,0,0,0.3)}
 
-    /* Nová tlačítka */
+    /* Čtvercová tlačítka */
     .top-buttons{
       display:flex;
       gap:8px;
     }
     .top-btn{
-      display:flex;
-      align-items:center;
-      gap:6px;
-      padding:6px 10px;
+      width:40px;
+      height:40px;
       background:linear-gradient(180deg,#1a1a1a,#0d0d0d);
       border:1px solid rgba(255,255,255,0.05);
-      color:#ccc;
-      font-size:13px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       cursor:pointer;
       transition:all 0.15s ease;
       box-shadow:inset 0 0 8px rgba(0,0,0,0.4);
     }
     .top-btn:hover{
       background:linear-gradient(180deg,#262626,#121212);
-      color:#fff;
       border-color:rgba(255,255,255,0.12);
     }
     .top-btn:active{
       transform:translateY(1px);
+    }
+    .top-btn img{
+      width:24px;
+      height:24px;
+      object-fit:contain;
+      filter:invert(80%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(90%);
     }
 
     #center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
@@ -129,7 +133,8 @@
       .big-title{font-size:28px}
       #console{width:96%}
       .top-buttons{gap:4px}
-      .top-btn{padding:5px 8px;font-size:12px}
+      .top-btn{width:36px;height:36px}
+      .top-btn img{width:20px;height:20px}
     }
   </style>
 </head>
@@ -142,8 +147,12 @@
       </div>
 
       <div class="top-buttons">
-        <button class="top-btn">🔦 Svítilna</button>
-        <button class="top-btn">🗺️ Mapa</button>
+        <button class="top-btn">
+          <img src="placeholder-svitilna.svg" alt="Svítilna" />
+        </button>
+        <button class="top-btn">
+          <img src="placeholder-mapa.svg" alt="Mapa" />
+        </button>
       </div>
 
       <div class="status">
@@ -153,7 +162,6 @@
 
     <section id="center">
       <div class="big-title">METRO 2033</div>
-      <div class="subtitle">Terminál kódů</div>
 
       <div id="console">
         <div class="console-title">Historie kódů</div>
