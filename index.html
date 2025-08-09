@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Metro Terminal — Kódy</title>
   <style>
-    /* ... (ponech tvůj styl z předchozí verze, hlavně .topbar, #console, #code-form atd.) ... */
     :root{
       --bg:#050505;
       --panel:#0e0e0e;
@@ -20,8 +19,6 @@
       background: linear-gradient(180deg, #050505 0%, #0b0b0b 100%);
       color:var(--text);
       font-family: var(--mono);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
       display:flex;
       align-items:stretch;
       justify-content:center;
@@ -41,36 +38,6 @@
       padding:8px 12px;
       background: linear-gradient(90deg, rgba(20,20,20,0.9), rgba(10,10,10,0.85));
       border-bottom:2px solid rgba(139,0,0,0.6);
-      box-shadow:0 2px 8px rgba(0,0,0,0.6);
-    }
-    .top-buttons{
-      display:flex;
-      gap:8px;
-    }
-    .top-btn{
-      width:40px;
-      height:40px;
-      background:linear-gradient(180deg,#1a1a1a,#0d0d0d);
-      border:1px solid rgba(255,255,255,0.05);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      transition:all 0.15s ease;
-      box-shadow:inset 0 0 8px rgba(0,0,0,0.4);
-    }
-    .top-btn:hover{
-      background:linear-gradient(180deg,#262626,#121212);
-      border-color:rgba(255,255,255,0.12);
-    }
-    .top-btn:active{
-      transform:translateY(1px);
-    }
-    .top-btn img{
-      width:24px;
-      height:24px;
-      object-fit:contain;
-      filter:invert(80%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(90%);
     }
     #center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
     .big-title{font-size:42px;letter-spacing:3px;color:#bfbfbf}
@@ -91,6 +58,17 @@
     .console-title{font-size:12px;color:#bdbdbd;margin-bottom:6px}
     #history{list-style:none;margin:0;padding:0;}
     #history li{padding:6px 8px;border-bottom:1px dashed rgba(255,255,255,0.03);}
+    .resources{
+      display:flex;
+      justify-content:center;
+      gap:20px;
+      padding:8px;
+      background:linear-gradient(180deg,#070707,#0b0b0b);
+      border-top:2px solid rgba(139,0,0,0.6);
+      border-bottom:2px solid rgba(139,0,0,0.6);
+      font-size:14px;
+    }
+    .resources span{color:var(--green);}
     #code-form{
       display:flex;
       gap:8px;
@@ -106,10 +84,7 @@
       color:var(--green);
       font-size:16px;
       outline:none;
-      box-shadow: inset 0 -14px 30px rgba(0,0,0,0.5);
-      caret-color: #fff;
     }
-    #code-input::placeholder{color:rgba(0,255,102,0.18)}
     #code-submit{
       padding:10px 16px;
       background:linear-gradient(180deg,#220000,var(--accent));
@@ -117,43 +92,18 @@
       border:none;
       cursor:pointer;
       font-weight:700;
-      letter-spacing:1px;
-    }
-    #code-submit:active{transform:translateY(1px)}
-    @media (max-width:420px){
-      .big-title{font-size:28px}
-      #console{width:96%}
-      .top-buttons{gap:4px}
-      .top-btn{width:36px;height:36px}
-      .top-btn img{width:20px;height:20px}
     }
   </style>
 </head>
 <body>
   <main id="app">
     <header class="topbar">
-      <div class="brand">
-        <div class="lamp"></div>
-        <span>TERMINÁL • STANICE</span>
-      </div>
-
-      <div class="top-buttons">
-        <button class="top-btn" title="Svítilna">
-          <img src="placeholder-svitilna.svg" alt="Svítilna" />
-        </button>
-        <button class="top-btn" title="Mapa">
-          <img src="placeholder-mapa.svg" alt="Mapa" />
-        </button>
-      </div>
-
-      <div class="status">
-        <span class="dot red"></span><span>OFFLINE</span>
-      </div>
+      <span>TERMINÁL • STANICE</span>
+      <span style="color:red;">OFFLINE</span>
     </header>
 
     <section id="center">
       <div class="big-title">METRO 2033</div>
-
       <div id="console">
         <div class="console-title">Historie kódů a stav</div>
         <ul id="history"></ul>
@@ -161,50 +111,47 @@
       </div>
     </section>
 
+    <div class="resources">
+      <div>Baterie: <span id="res-b">0</span></div>
+      <div>Filtry: <span id="res-f">0</span></div>
+      <div>Voda: <span id="res-w">0</span></div>
+    </div>
+
     <form id="code-form" autocomplete="off">
-      <input id="code-input" name="code" type="text" maxlength="40" placeholder="Zadej kód..." aria-label="Zadej kód" />
+      <input id="code-input" type="text" maxlength="40" placeholder="Zadej kód..." />
       <button id="code-submit" type="submit">OK</button>
     </form>
   </main>
 
   <script>
     const STORAGE_HISTORY_KEY = 'metro_codes_history_v1';
-    const STORAGE_USED_U_CODES = 'metro_used_u_codes_v1';
-    let codesDB = [];
-    let batteryCount = 0;
+    const STORAGE_USED_CODES_KEY = 'metro_used_codes_v1';
 
-    const form = document.getElementById('code-form');
-    const input = document.getElementById('code-input');
+    let codesDB = {};
+    let batteryCount = 0;
+    let filterCount = 0;
+    let waterCount = 0;
+
     const hist = document.getElementById('history');
     const statusMsg = document.getElementById('status-msg');
+    const resB = document.getElementById('res-b');
+    const resF = document.getElementById('res-f');
+    const resW = document.getElementById('res-w');
 
-    // načtení historie z localStorage
     function loadHistory(){
-      try {
-        const raw = localStorage.getItem(STORAGE_HISTORY_KEY);
-        return raw ? JSON.parse(raw) : [];
-      } catch {
-        return [];
-      }
+      try { return JSON.parse(localStorage.getItem(STORAGE_HISTORY_KEY)) || []; }
+      catch { return []; }
     }
     function saveHistory(arr){
       localStorage.setItem(STORAGE_HISTORY_KEY, JSON.stringify(arr));
     }
-
-    // U-kódy, které už byly použity (jednorázové)
-    function loadUsedUCodes(){
-      try {
-        const raw = localStorage.getItem(STORAGE_USED_U_CODES);
-        return raw ? JSON.parse(raw) : [];
-      } catch {
-        return [];
-      }
+    function loadUsedCodes(){
+      try { return JSON.parse(localStorage.getItem(STORAGE_USED_CODES_KEY)) || []; }
+      catch { return []; }
     }
-    function saveUsedUCodes(arr){
-      localStorage.setItem(STORAGE_USED_U_CODES, JSON.stringify(arr));
+    function saveUsedCodes(arr){
+      localStorage.setItem(STORAGE_USED_CODES_KEY, JSON.stringify(arr));
     }
-
-    // vykreslení historie
     function renderHistory(){
       const list = loadHistory();
       hist.innerHTML = '';
@@ -222,96 +169,68 @@
         hist.appendChild(li);
       });
     }
-
-    // akce podle kódu
-    function performAction(codeObj){
-      // Pokud je kód UB (user), přidáme baterie (pokud je value)
-      if(codeObj.code.startsWith('UB')){
-        if(codeObj.value){
-          batteryCount += codeObj.value;
-          updateStatus();
-          return `Přidáno ${codeObj.value} baterií.`;
-        }
-        return 'Kód neobsahuje hodnotu.';
-      }
-      // Kódy S* - servisní, např. SOPEN, SPOWER
-      else if(codeObj.code.startsWith('S')){
-        switch(codeObj.code){
-          case 'SOPEN': return 'Dveře otevřeny.';
-          case 'SPOWER': return 'Napájení zapnuto.';
-          default: return `Servisní kód: ${codeObj.code}`;
-        }
-      }
-      return 'Neznámý kód.';
+    function updateResourcesPanel(){
+      resB.textContent = batteryCount;
+      resF.textContent = filterCount;
+      resW.textContent = waterCount;
     }
-
-    // Načtení databáze z JSONu
     async function loadCodesDB(){
       try {
-        const resp = await fetch('codes-db.json', {cache: "reload"});
-        if(!resp.ok) throw new Error('Nepodařilo se načíst databázi kódů.');
+        const resp = await fetch('codes-db.json', {cache:"reload"});
+        if(!resp.ok) throw new Error();
         codesDB = await resp.json();
         statusMsg.textContent = 'Databáze kódů načtena.';
       } catch(e){
-        statusMsg.textContent = 'Chyba při načítání databáze kódů.';
-        console.error(e);
+        statusMsg.textContent = 'Chyba při načítání databáze.';
       }
     }
 
-    // Kontrola a zpracování kódu po submitu
-    form.addEventListener('submit', async (e) => {
+    document.getElementById('code-form').addEventListener('submit', (e)=>{
       e.preventDefault();
+      const input = document.getElementById('code-input');
       const code = input.value.trim().toUpperCase();
       if(!code){
         statusMsg.textContent = 'Zadej kód!';
         return;
       }
-      if(codesDB.length === 0){
-        statusMsg.textContent = 'Databáze kódů se ještě nenačetla, počkej.';
-        return;
-      }
-
-      const codeObj = codesDB.find(c => c.code === code);
-      if(!codeObj){
+      if(!codesDB[code]){
         statusMsg.textContent = 'Neplatný kód.';
         input.value = '';
         return;
       }
-
-      if(code.startsWith('U')){
-        // jednorázové kódy - zkontrolujeme, zda již nebyl použit
-        let used = loadUsedUCodes();
-        if(used.includes(code)){
-          statusMsg.textContent = 'Tento kód již byl použit.';
-          input.value = '';
-          return;
-        }
-        // kód přijímáme, uložíme do historie i do použité
-        used.push(code);
-        saveUsedUCodes(used);
+      const value = codesDB[code];
+      const firstLetter = code.charAt(0);
+      const secondLetter = code.charAt(1);
+      const usedCodes = loadUsedCodes();
+      if(firstLetter === 'U' && usedCodes.includes(code)){
+        statusMsg.textContent = 'Tento kód již byl použit.';
+        input.value = '';
+        return;
       }
-      // kódy S* jsou neomezené, nemusíme nic extra dělat
-
-      // uložíme do historie
+      switch(secondLetter){
+        case 'B': batteryCount += value; break;
+        case 'F': filterCount += value; break;
+        case 'W': waterCount += value; break;
+        default: statusMsg.textContent = 'Neznámý typ kódu.'; return;
+      }
+      updateResourcesPanel();
       let history = loadHistory();
       history.push({code, t: Date.now()});
       saveHistory(history);
+      if(firstLetter === 'U'){
+        usedCodes.push(code);
+        saveUsedCodes(usedCodes);
+      }
       renderHistory();
-
-      // vykonáme akci
-      const actionMsg = performAction(codeObj);
-      statusMsg.textContent = actionMsg;
-
+      statusMsg.textContent = `Kód ${code} přidán: ${value}`;
       input.value = '';
       input.focus();
     });
 
-    // inicializace
-    (async () => {
+    (async()=>{
       await loadCodesDB();
       renderHistory();
-      updateStatus();
-      input.focus();
+      updateResourcesPanel();
     })();
   </script>
 </body>
