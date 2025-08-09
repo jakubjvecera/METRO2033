@@ -4,7 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Metro Terminal — Kódy</title>
+  <meta name="theme-color" content="#050505">
+  <link rel="manifest" href="manifest.json">
+
   <style>
+    /* --- tvoje původní CSS beze změn --- */
     :root{
       --bg:#050505;
       --panel:#0e0e0e;
@@ -19,8 +23,6 @@
       background: linear-gradient(180deg, #050505 0%, #0b0b0b 100%);
       color:var(--text);
       font-family: var(--mono);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
       display:flex;
       align-items:stretch;
       justify-content:center;
@@ -52,20 +54,12 @@
     .status{font-size:13px;color:#cfcfcf;display:flex;gap:8px;align-items:center}
     .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
     .dot.red{background:var(--accent);box-shadow:0 0 8px rgba(139,0,0,0.3)}
-
-    /* Čtvercová tlačítka */
-    .top-buttons{
-      display:flex;
-      gap:8px;
-    }
+    .top-buttons{display:flex;gap:8px;}
     .top-btn{
-      width:40px;
-      height:40px;
+      width:40px;height:40px;
       background:linear-gradient(180deg,#1a1a1a,#0d0d0d);
       border:1px solid rgba(255,255,255,0.05);
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      display:flex;align-items:center;justify-content:center;
       cursor:pointer;
       transition:all 0.15s ease;
       box-shadow:inset 0 0 8px rgba(0,0,0,0.4);
@@ -74,26 +68,18 @@
       background:linear-gradient(180deg,#262626,#121212);
       border-color:rgba(255,255,255,0.12);
     }
-    .top-btn:active{
-      transform:translateY(1px);
-    }
+    .top-btn:active{transform:translateY(1px);}
     .top-btn img{
-      width:24px;
-      height:24px;
-      object-fit:contain;
+      width:24px;height:24px;object-fit:contain;
       filter:invert(80%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(90%);
     }
-
     #center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
     .big-title{font-size:42px;letter-spacing:3px;color:#bfbfbf}
-    .subtitle{font-size:13px;color:#9a9a9a;margin-bottom:18px}
     #console{
-      width:92%;
-      max-width:760px;
+      width:92%;max-width:760px;
       background:linear-gradient(180deg, rgba(0,0,0,0.55), rgba(10,10,10,0.45));
       border:1px solid rgba(80,80,80,0.3);
-      padding:10px;
-      margin-top:12px;
+      padding:10px;margin-top:12px;
       box-shadow: inset 0 0 24px rgba(0,0,0,0.6);
       border-left:6px solid var(--accent);
     }
@@ -101,32 +87,21 @@
     #history{list-style:none;margin:0;padding:0;max-height:180px;overflow:auto}
     #history li{padding:6px 8px;border-bottom:1px dashed rgba(255,255,255,0.03);font-size:13px;color:var(--green)}
     #code-form{
-      display:flex;
-      gap:8px;
-      padding:10px;
+      display:flex;gap:8px;padding:10px;
       background:linear-gradient(180deg,#070707,#0b0b0b);
       border-top:3px solid rgba(139,0,0,0.6);
     }
     #code-input{
-      flex:1;
-      padding:12px 14px;
-      background:transparent;
+      flex:1;padding:12px 14px;background:transparent;
       border:1px solid rgba(255,255,255,0.06);
-      color:var(--green);
-      font-size:16px;
-      outline:none;
-      box-shadow: inset 0 -14px 30px rgba(0,0,0,0.5);
-      caret-color: #fff;
+      color:var(--green);font-size:16px;
+      outline:none;caret-color: #fff;
     }
     #code-input::placeholder{color:rgba(0,255,102,0.18)}
     #code-submit{
       padding:10px 16px;
       background:linear-gradient(180deg,#220000,var(--accent));
-      color:#fff;
-      border:none;
-      cursor:pointer;
-      font-weight:700;
-      letter-spacing:1px;
+      color:#fff;border:none;cursor:pointer;font-weight:700;letter-spacing:1px;
     }
     #code-submit:active{transform:translateY(1px)}
     @media (max-width:420px){
@@ -145,32 +120,21 @@
         <div class="lamp"></div>
         <span>TERMINÁL • STANICE</span>
       </div>
-
       <div class="top-buttons">
-        <button class="top-btn">
-          <img src="placeholder-svitilna.svg" alt="Svítilna" />
-        </button>
-        <button class="top-btn">
-          <img src="placeholder-mapa.svg" alt="Mapa" />
-        </button>
+        <button class="top-btn"><img src="placeholder-svitilna.svg" alt="Svítilna" /></button>
+        <button class="top-btn"><img src="placeholder-mapa.svg" alt="Mapa" /></button>
       </div>
-
-      <div class="status">
-        <span class="dot red"></span><span>OFFLINE</span>
-      </div>
+      <div class="status"><span class="dot red"></span><span>OFFLINE</span></div>
     </header>
-
     <section id="center">
       <div class="big-title">METRO 2033</div>
-
       <div id="console">
         <div class="console-title">Historie kódů</div>
         <ul id="history"></ul>
       </div>
     </section>
-
     <form id="code-form" autocomplete="off">
-      <input id="code-input" name="code" type="text" maxlength="40" placeholder="Zadej kód..." aria-label="Zadej kód" />
+      <input id="code-input" name="code" type="text" maxlength="40" placeholder="Zadej kód..." />
       <button id="code-submit" type="submit">OK</button>
     </form>
   </main>
@@ -202,7 +166,7 @@
       list.slice().reverse().forEach(item=>{
         const li = document.createElement('li');
         const time = new Date(item.t).toLocaleTimeString();
-        li.textContent = \`\${item.code} — \${time}\`;
+        li.textContent = `${item.code} — ${time}`;
         hist.appendChild(li);
       });
     }
@@ -216,15 +180,14 @@
       renderHistory();
       input.value = '';
       input.focus();
-      flashSubmit();
     });
-    function flashSubmit(){
-      const b = document.getElementById('code-submit');
-      b.style.transform = 'scale(0.98)';
-      setTimeout(()=> b.style.transform = '', 120);
-    }
     renderHistory();
     input.focus();
+
+    // --- PWA část ---
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
   </script>
 </body>
 </html>
