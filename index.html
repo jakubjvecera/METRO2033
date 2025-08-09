@@ -160,7 +160,7 @@
   </main>
 <script type="module" src="./app.js"></script>
 <script>
-  const tools = [
+   const tools = [
     { id: 'map', label: '🗺️', title: 'Mapa' },
     { id: 'flashlight', label: '🔦', title: 'Svítilna' },
     { id: 'gas-mask', label: '😷', title: 'Plynová maska' },
@@ -176,13 +176,17 @@
       btn.title = tool.title;
 
       btn.addEventListener('click', () => {
-        // Přepínač: deaktivujeme všechny ostatní
-        document.querySelectorAll('.tool-button').forEach(b => b.classList.remove('active'));
-        // Aktivujeme kliknuté tlačítko
-        btn.classList.add('active');
-
-        // Efekty nástroje
-        activateToolEffect(tool.id);
+        if (btn.classList.contains('active')) {
+          // Deaktivujeme tlačítko, pokud je již aktivní
+          btn.classList.remove('active');
+          deactivateToolEffect(tool.id);
+        } else {
+          // Deaktivujeme všechny ostatní
+          document.querySelectorAll('.tool-button').forEach(b => b.classList.remove('active'));
+          // Aktivujeme kliknuté tlačítko
+          btn.classList.add('active');
+          activateToolEffect(tool.id);
+        }
       });
 
       container.appendChild(btn);
@@ -191,7 +195,12 @@
 
   function activateToolEffect(toolId) {
     console.log(`Aktivován nástroj: ${toolId}`);
-    alert(`Aktivováno: ${tools.find(t => t.id === toolId).title}`);
+    // Tady můžeš přidat kód pro aktivaci efektu nástroje
+  }
+
+  function deactivateToolEffect(toolId) {
+    console.log(`Deaktivován nástroj: ${toolId}`);
+    // Tady můžeš přidat kód pro deaktivaci efektu nástroje
   }
 
   window.addEventListener('DOMContentLoaded', () => {
