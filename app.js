@@ -16,7 +16,7 @@ form.addEventListener('submit', e => {
     return;
   }
 
-  if(code === 'AZREST'){
+  if(code === 'AZ4658'){
     if(confirm('Opravdu chceš vymazat celou lokální paměť? Tato akce je nevratná.')){
       localStorage.clear();
       resetResources();
