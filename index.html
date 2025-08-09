@@ -3,12 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>METRO Terminal</title>
-  <meta name="theme-color" content="#050505">
-  <link rel="manifest" href="manifest.json">
-
+  <title>Metro Terminal — Kódy</title>
   <style>
-    /* --- tvoje původní CSS beze změn --- */
+    /* ... (ponech tvůj styl z předchozí verze, hlavně .topbar, #console, #code-form atd.) ... */
     :root{
       --bg:#050505;
       --panel:#0e0e0e;
@@ -23,6 +20,8 @@
       background: linear-gradient(180deg, #050505 0%, #0b0b0b 100%);
       color:var(--text);
       font-family: var(--mono);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
       display:flex;
       align-items:stretch;
       justify-content:center;
@@ -44,22 +43,18 @@
       border-bottom:2px solid rgba(139,0,0,0.6);
       box-shadow:0 2px 8px rgba(0,0,0,0.6);
     }
-    .brand{display:flex;align-items:center;gap:10px;font-size:14px}
-    .lamp{
-      width:14px;height:14px;border-radius:50%;
-      background:linear-gradient(180deg,var(--green),#88ff9a);
-      box-shadow:0 0 8px rgba(0,255,102,0.12), inset 0 -2px 4px rgba(0,0,0,0.5);
-      border:1px solid rgba(255,255,255,0.06);
+    .top-buttons{
+      display:flex;
+      gap:8px;
     }
-    .status{font-size:13px;color:#cfcfcf;display:flex;gap:8px;align-items:center}
-    .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
-    .dot.red{background:var(--accent);box-shadow:0 0 8px rgba(139,0,0,0.3)}
-    .top-buttons{display:flex;gap:8px;}
     .top-btn{
-      width:40px;height:40px;
+      width:40px;
+      height:40px;
       background:linear-gradient(180deg,#1a1a1a,#0d0d0d);
       border:1px solid rgba(255,255,255,0.05);
-      display:flex;align-items:center;justify-content:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       cursor:pointer;
       transition:all 0.15s ease;
       box-shadow:inset 0 0 8px rgba(0,0,0,0.4);
@@ -68,40 +63,61 @@
       background:linear-gradient(180deg,#262626,#121212);
       border-color:rgba(255,255,255,0.12);
     }
-    .top-btn:active{transform:translateY(1px);}
+    .top-btn:active{
+      transform:translateY(1px);
+    }
     .top-btn img{
-      width:24px;height:24px;object-fit:contain;
+      width:24px;
+      height:24px;
+      object-fit:contain;
       filter:invert(80%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(90%);
     }
     #center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
     .big-title{font-size:42px;letter-spacing:3px;color:#bfbfbf}
     #console{
-      width:92%;max-width:760px;
+      width:92%;
+      max-width:760px;
       background:linear-gradient(180deg, rgba(0,0,0,0.55), rgba(10,10,10,0.45));
       border:1px solid rgba(80,80,80,0.3);
-      padding:10px;margin-top:12px;
+      padding:10px;
+      margin-top:12px;
       box-shadow: inset 0 0 24px rgba(0,0,0,0.6);
       border-left:6px solid var(--accent);
+      font-size:14px;
+      max-height:180px;
+      overflow-y:auto;
+      color: var(--green);
     }
     .console-title{font-size:12px;color:#bdbdbd;margin-bottom:6px}
-    #history{list-style:none;margin:0;padding:0;max-height:180px;overflow:auto}
-    #history li{padding:6px 8px;border-bottom:1px dashed rgba(255,255,255,0.03);font-size:13px;color:var(--green)}
+    #history{list-style:none;margin:0;padding:0;}
+    #history li{padding:6px 8px;border-bottom:1px dashed rgba(255,255,255,0.03);}
     #code-form{
-      display:flex;gap:8px;padding:10px;
+      display:flex;
+      gap:8px;
+      padding:10px;
       background:linear-gradient(180deg,#070707,#0b0b0b);
       border-top:3px solid rgba(139,0,0,0.6);
     }
     #code-input{
-      flex:1;padding:12px 14px;background:transparent;
+      flex:1;
+      padding:12px 14px;
+      background:transparent;
       border:1px solid rgba(255,255,255,0.06);
-      color:var(--green);font-size:16px;
-      outline:none;caret-color: #fff;
+      color:var(--green);
+      font-size:16px;
+      outline:none;
+      box-shadow: inset 0 -14px 30px rgba(0,0,0,0.5);
+      caret-color: #fff;
     }
     #code-input::placeholder{color:rgba(0,255,102,0.18)}
     #code-submit{
       padding:10px 16px;
       background:linear-gradient(180deg,#220000,var(--accent));
-      color:#fff;border:none;cursor:pointer;font-weight:700;letter-spacing:1px;
+      color:#fff;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      letter-spacing:1px;
     }
     #code-submit:active{transform:translateY(1px)}
     @media (max-width:420px){
@@ -120,39 +136,75 @@
         <div class="lamp"></div>
         <span>TERMINÁL • STANICE</span>
       </div>
+
       <div class="top-buttons">
-        <button class="top-btn"><img src="placeholder-svitilna.svg" alt="Svítilna" /></button>
-        <button class="top-btn"><img src="placeholder-mapa.svg" alt="Mapa" /></button>
+        <button class="top-btn" title="Svítilna">
+          <img src="placeholder-svitilna.svg" alt="Svítilna" />
+        </button>
+        <button class="top-btn" title="Mapa">
+          <img src="placeholder-mapa.svg" alt="Mapa" />
+        </button>
       </div>
-      <div class="status"><span class="dot red"></span><span>OFFLINE</span></div>
+
+      <div class="status">
+        <span class="dot red"></span><span>OFFLINE</span>
+      </div>
     </header>
+
     <section id="center">
       <div class="big-title">METRO 2033</div>
+
       <div id="console">
-        <div class="console-title">Historie kódů</div>
+        <div class="console-title">Historie kódů a stav</div>
         <ul id="history"></ul>
+        <div id="status-msg" style="margin-top:8px;color:#ccc;min-height:20px;"></div>
       </div>
     </section>
+
     <form id="code-form" autocomplete="off">
-      <input id="code-input" name="code" type="text" maxlength="40" placeholder="Zadej kód..." />
+      <input id="code-input" name="code" type="text" maxlength="40" placeholder="Zadej kód..." aria-label="Zadej kód" />
       <button id="code-submit" type="submit">OK</button>
     </form>
   </main>
 
   <script>
+    const STORAGE_HISTORY_KEY = 'metro_codes_history_v1';
+    const STORAGE_USED_U_CODES = 'metro_used_u_codes_v1';
+    let codesDB = [];
+    let batteryCount = 0;
+
     const form = document.getElementById('code-form');
     const input = document.getElementById('code-input');
     const hist = document.getElementById('history');
-    const STORAGE_KEY = 'metro_codes_history_v1';
+    const statusMsg = document.getElementById('status-msg');
 
+    // načtení historie z localStorage
     function loadHistory(){
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return [];
-      try { return JSON.parse(raw); } catch(e){ return []; }
+      try {
+        const raw = localStorage.getItem(STORAGE_HISTORY_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
     }
     function saveHistory(arr){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+      localStorage.setItem(STORAGE_HISTORY_KEY, JSON.stringify(arr));
     }
+
+    // U-kódy, které už byly použity (jednorázové)
+    function loadUsedUCodes(){
+      try {
+        const raw = localStorage.getItem(STORAGE_USED_U_CODES);
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    }
+    function saveUsedUCodes(arr){
+      localStorage.setItem(STORAGE_USED_U_CODES, JSON.stringify(arr));
+    }
+
+    // vykreslení historie
     function renderHistory(){
       const list = loadHistory();
       hist.innerHTML = '';
@@ -170,24 +222,102 @@
         hist.appendChild(li);
       });
     }
-    form.addEventListener('submit', (e)=>{
+
+    // zobrazení statusu (stav baterií atd.)
+    function updateStatus(){
+      statusMsg.textContent = `Baterie: ${batteryCount}`;
+    }
+
+    // akce podle kódu
+    function performAction(codeObj){
+      // Pokud je kód U* (user), přidáme baterie (pokud je value)
+      if(codeObj.code.startsWith('U')){
+        if(codeObj.value){
+          batteryCount += codeObj.value;
+          updateStatus();
+          return `Přidáno ${codeObj.value} baterií.`;
+        }
+        return 'Kód neobsahuje hodnotu.';
+      }
+      // Kódy S* - servisní, např. SOPEN, SPOWER
+      else if(codeObj.code.startsWith('S')){
+        switch(codeObj.code){
+          case 'SOPEN': return 'Dveře otevřeny.';
+          case 'SPOWER': return 'Napájení zapnuto.';
+          default: return `Servisní kód: ${codeObj.code}`;
+        }
+      }
+      return 'Neznámý kód.';
+    }
+
+    // Načtení databáze z JSONu
+    async function loadCodesDB(){
+      try {
+        const resp = await fetch('codes-db.json', {cache: "reload"});
+        if(!resp.ok) throw new Error('Nepodařilo se načíst databázi kódů.');
+        codesDB = await resp.json();
+        statusMsg.textContent = 'Databáze kódů načtena.';
+      } catch(e){
+        statusMsg.textContent = 'Chyba při načítání databáze kódů.';
+        console.error(e);
+      }
+    }
+
+    // Kontrola a zpracování kódu po submitu
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const code = input.value.trim();
-      if(!code) return;
-      const list = loadHistory();
-      list.push({ code: code.toUpperCase(), t: Date.now() });
-      saveHistory(list);
+      const code = input.value.trim().toUpperCase();
+      if(!code){
+        statusMsg.textContent = 'Zadej kód!';
+        return;
+      }
+      if(codesDB.length === 0){
+        statusMsg.textContent = 'Databáze kódů se ještě nenačetla, počkej.';
+        return;
+      }
+
+      const codeObj = codesDB.find(c => c.code === code);
+      if(!codeObj){
+        statusMsg.textContent = 'Neplatný kód.';
+        input.value = '';
+        return;
+      }
+
+      if(code.startsWith('U')){
+        // jednorázové kódy - zkontrolujeme, zda již nebyl použit
+        let used = loadUsedUCodes();
+        if(used.includes(code)){
+          statusMsg.textContent = 'Tento kód již byl použit.';
+          input.value = '';
+          return;
+        }
+        // kód přijímáme, uložíme do historie i do použité
+        used.push(code);
+        saveUsedUCodes(used);
+      }
+      // kódy S* jsou neomezené, nemusíme nic extra dělat
+
+      // uložíme do historie
+      let history = loadHistory();
+      history.push({code, t: Date.now()});
+      saveHistory(history);
       renderHistory();
+
+      // vykonáme akci
+      const actionMsg = performAction(codeObj);
+      statusMsg.textContent = actionMsg;
+
       input.value = '';
       input.focus();
     });
-    renderHistory();
-    input.focus();
 
-    // --- PWA část ---
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
-    }
+    // inicializace
+    (async () => {
+      await loadCodesDB();
+      renderHistory();
+      updateStatus();
+      input.focus();
+    })();
   </script>
 </body>
 </html>
