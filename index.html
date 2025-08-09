@@ -6,136 +6,157 @@
 <title>Metro Terminal — Kódy</title>
 <style>
   :root {
-    --accent: #8b0000;
-    --green: #00ff66;
+    --bg:#050505;
+    --panel:#0e0e0e;
+    --accent:#8b0000;
+    --green:#00ff66;
+    --text:#d8d8d8;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
   }
-  body,html,#app {
-    margin: 0; padding: 0; height: 100%;
-    font-family: monospace;
-    background: #050505;
-    color: #d8d8d8;
+  *{box-sizing:border-box}
+  html,body,#app{height:100%;margin:0;padding:0}
+  body{
+    background: linear-gradient(180deg, #050505 0%, #0b0b0b 100%);
+    color:var(--text);
+    font-family: var(--mono);
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
   }
-  #app {
-    max-width: 900px;
-    margin: 0 auto;
+  #app{
+    width:100%;
+    max-width:900px;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
     position: relative;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
   }
-  .topbar {
-    height: 56px;
-    background: #111;
-    color: white;
-    display: flex;
-    align-items: center;
-    padding: 0 12px;
-    justify-content: space-between;
-    border-bottom: 2px solid var(--accent);
-    position: relative;
-    z-index: 1001;
-  }
+  /* tlačítka nástrojů */
   #tools-container {
     display: flex;
     gap: 8px;
+    align-items: center;
   }
   .tool-button {
-    background: #222;
+    width: 36px;
+    height: 36px;
+    background: var(--panel);
     border: 1.5px solid var(--accent);
     color: var(--green);
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    padding: 6px 10px;
-    font-size: 20px;
-    border-radius: 4px;
     user-select: none;
+    border-radius: 4px;
+    transition: background 0.2s ease;
   }
   .tool-button.active {
     background: var(--accent);
-    color: white;
+    color: #fff;
   }
-
-  /* Efekt svítilny */
+  /* horní lišta */
+  .topbar{
+    height:56px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:8px 12px;
+    background: linear-gradient(90deg, rgba(20,20,20,0.9), rgba(10,10,10,0.85));
+    border-bottom:2px solid rgba(139,0,0,0.6);
+  }
+  /* konzole */
+  #center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
+  .big-title{font-size:42px;letter-spacing:3px;color:#bfbfbf}
+  #console{
+    width:92%;
+    max-width:760px;
+    background:linear-gradient(180deg, rgba(0,0,0,0.55), rgba(10,10,10,0.45));
+    border:1px solid rgba(80,80,80,0.3);
+    padding:10px;
+    margin-top:12px;
+    box-shadow: inset 0 0 24px rgba(0,0,0,0.6);
+    border-left:6px solid var(--accent);
+    font-size:14px;
+    max-height:200px;
+    overflow-y:auto;
+    color: var(--green);
+    display:flex;
+    flex-direction:column;
+  }
+  /* suroviny */
+  .resources{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    padding:8px;
+    background:linear-gradient(180deg,#070707,#0b0b0b);
+    border-top:2px solid rgba(139,0,0,0.6);
+    border-bottom:2px solid rgba(139,0,0,0.6);
+    font-size:14px;
+  }
+  .resources span{color:var(--green);}
+  /* formulář pro kódy */
+  #code-form{
+    display:flex;
+    gap:8px;
+    padding:10px;
+    background:linear-gradient(180deg,#070707,#0b0b0b);
+    border-top:3px solid rgba(139,0,0,0.6);
+  }
+  #code-input{
+    flex:1;
+    padding:12px 14px;
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.06);
+    color:var(--green);
+    font-size:16px;
+    outline:none;
+  }
+  #code-submit{
+    padding:10px 16px;
+    background:linear-gradient(180deg,#220000,var(--accent));
+    color:#fff;
+    border:none;
+    cursor:pointer;
+    font-weight:700;
+  }
+  /* efekt svítilny */
   #flashlight-overlay {
-    position: absolute;
+    position: fixed;
     top: 56px;
     left: 0;
-    right: 0;
-    bottom: 0;
+    width: 100%;
+    height: calc(100% - 56px);
     pointer-events: none;
-    background: radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0.85) 25%, rgba(0,0,0,0.95) 60%);
+    background: rgba(255,255,255,1);
     opacity: 0;
     transition: opacity 0.3s ease;
-    z-index: 900;
+    z-index: 999;
+  }
+  #flashlight-overlay.dim {
+    background: rgba(255,255,255,0.4);
   }
   #flashlight-overlay.active {
     opacity: 1;
   }
-
-  /* Efekt plynové masky */
-  #gas-mask-overlay {
+  /* tlačítko výměny baterie */
+  #battery-replace {
     position: absolute;
     top: 56px;
     left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    background-color: rgba(200, 200, 180, 0.15);
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    z-index: 800;
-  }
-  #gas-mask-overlay.active {
-    opacity: 1;
-  }
-  #gas-mask-fog {
-    position: absolute;
-    top: 56px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    backdrop-filter: none;
-    background: rgba(255,255,255,0);
-    transition: backdrop-filter 0.5s ease, background 0.5s ease;
-    z-index: 850;
-  }
-  #gas-mask-fog.foggy {
-    background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(4px);
-  }
-
-  /* Tlačítka vyměnit */
-  #flashlight-replace-btn,
-  #gas-mask-replace-btn {
-    position: absolute;
-    top: 56px;
-    left: 50%;
-    transform: translateX(-50%);
+    width: 100%;
+    padding: 12px;
     background: var(--accent);
-    color: white;
-    border: none;
-    padding: 12px 28px;
-    border-radius: 5px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
     cursor: pointer;
-    font-weight: 700;
     display: none;
-    user-select: none;
-    z-index: 1002;
-  }
-  #flashlight-replace-btn:hover,
-  #gas-mask-replace-btn:hover {
-    background: #ff0000;
-  }
-
-  /* Zobrazování surovin */
-  .resources {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    padding: 8px;
-    background: #0b0b0b;
-    border-top: 2px solid var(--accent);
-    color: var(--green);
+    z-index: 1000;
   }
 </style>
 </head>
@@ -147,19 +168,28 @@
     <span style="color:red;">OFFLINE</span>
   </header>
 
-  <div style="flex:1; display:flex; align-items:center; justify-content:center; font-size:36px;">METRO 2033</div>
+  <div id="battery-replace">Svítilna: vyměnit baterie</div>
 
+  <section id="center">
+    <div class="big-title">METRO 2033</div>
+    <div id="console">
+      <ul id="history"></ul>
+    </div>
+  </section>
+
+  <!-- efekt svítilny -->
   <div id="flashlight-overlay"></div>
-  <div id="gas-mask-overlay"></div>
-  <div id="gas-mask-fog"></div>
-
-  <button id="flashlight-replace-btn">Svítilna: vyměnit baterie</button>
-  <button id="gas-mask-replace-btn">Plynová maska: vyměnit filtr</button>
 
   <div class="resources">
-    <div>Baterie: <span id="res-b">1</span></div>
-    <div>Filtry: <span id="res-f">1</span></div>
+    <div>Baterie: <span id="res-b">3</span></div>
+    <div>Filtry: <span id="res-f">0</span></div>
+    <div>Voda: <span id="res-w">0</span></div>
   </div>
+
+  <form id="code-form" autocomplete="off">
+    <input id="code-input" type="text" maxlength="40" placeholder="Zadej kód..." />
+    <button id="code-submit" type="submit">OK</button>
+  </form>
 </main>
 
 <script>
@@ -168,23 +198,9 @@
     { id: 'flashlight', label: '🔦', title: 'Svítilna' },
     { id: 'gas-mask', label: '😷', title: 'Plynová maska' },
   ];
-
-  let resources = { battery: 1, filter: 1 };
   let activeTools = [];
-
-  // Časovače a intervaly
-  let flashlightTime = 60;
-  let flashlightInterval = null;
-
-  let gasMaskTime = 180;
-  let gasMaskInterval = null;
-
-  const flashlightOverlay = document.getElementById('flashlight-overlay');
-  const gasMaskOverlay = document.getElementById('gas-mask-overlay');
-  const gasMaskFog = document.getElementById('gas-mask-fog');
-
-  const flashlightBtn = document.getElementById('flashlight-replace-btn');
-  const gasMaskBtn = document.getElementById('gas-mask-replace-btn');
+  let flashlightTimer = null;
+  let flashlightTimeLeft = 0;
 
   function initTools() {
     const container = document.getElementById('tools-container');
@@ -192,23 +208,20 @@
       const btn = document.createElement('button');
       btn.className = 'tool-button';
       btn.id = `tool-${tool.id}`;
-      btn.title = tool.title;
       btn.textContent = tool.label;
-
+      btn.title = tool.title;
       btn.addEventListener('click', () => toggleTool(tool.id, btn));
       container.appendChild(btn);
     });
   }
 
   function toggleTool(toolId, btn) {
-    // Nelze mapa + svítilna dohromady
     if ((toolId === 'map' && activeTools.includes('flashlight')) ||
         (toolId === 'flashlight' && activeTools.includes('map'))) {
       return;
     }
-
     if (activeTools.includes(toolId)) {
-      activeTools = activeTools.filter(t => t !== toolId);
+      activeTools = activeTools.filter(id => id !== toolId);
       btn.classList.remove('active');
       deactivateToolEffect(toolId);
     } else {
@@ -220,116 +233,52 @@
 
   function activateToolEffect(toolId) {
     if (toolId === 'flashlight') {
-      flashlightTime = 60;
-      flashlightOverlay.style.opacity = '1';
-      flashlightOverlay.classList.add('active');
-      hideFlashlightReplaceBtn();
-      if (flashlightInterval) clearInterval(flashlightInterval);
-      flashlightInterval = setInterval(() => {
-        flashlightTime--;
-        if (flashlightTime <= 10 && resources.battery > 0) {
-          flashlightOverlay.style.opacity = (flashlightTime / 10).toFixed(2);
-          showFlashlightReplaceBtn();
-        } else {
-          flashlightOverlay.style.opacity = '1';
-          hideFlashlightReplaceBtn();
-        }
-        if (flashlightTime <= 0) {
-          deactivateTool('flashlight');
-        }
-      }, 1000);
-    } else if (toolId === 'gas-mask') {
-      gasMaskTime = 180;
-      gasMaskOverlay.classList.add('active');
-      gasMaskFog.classList.remove('foggy');
-      hideGasMaskReplaceBtn();
-      if (gasMaskInterval) clearInterval(gasMaskInterval);
-      gasMaskInterval = setInterval(() => {
-        gasMaskTime--;
-        if (gasMaskTime <= 20) {
-          gasMaskFog.classList.add('foggy');
-          if (resources.filter > 0) {
-            showGasMaskReplaceBtn();
-          } else {
-            hideGasMaskReplaceBtn();
-          }
-        } else {
-          gasMaskFog.classList.remove('foggy');
-          hideGasMaskReplaceBtn();
-        }
-        if (gasMaskTime <= 0) {
-          deactivateTool('gas-mask');
-        }
-      }, 1000);
+      startFlashlightTimer(60);
     }
   }
 
   function deactivateToolEffect(toolId) {
     if (toolId === 'flashlight') {
-      flashlightOverlay.classList.remove('active');
-      flashlightOverlay.style.opacity = '0';
-      hideFlashlightReplaceBtn();
-      if (flashlightInterval) {
-        clearInterval(flashlightInterval);
-        flashlightInterval = null;
+      stopFlashlightTimer();
+    }
+  }
+
+  function startFlashlightTimer(seconds) {
+    flashlightTimeLeft = seconds;
+    document.getElementById('flashlight-overlay').classList.add('active');
+    flashlightTimer = setInterval(() => {
+      flashlightTimeLeft--;
+      if (flashlightTimeLeft <= 10) {
+        document.getElementById('flashlight-overlay').classList.add('dim');
       }
-      flashlightTime = 60;
-    } else if (toolId === 'gas-mask') {
-      gasMaskOverlay.classList.remove('active');
-      gasMaskFog.classList.remove('foggy');
-      hideGasMaskReplaceBtn();
-      if (gasMaskInterval) {
-        clearInterval(gasMaskInterval);
-        gasMaskInterval = null;
+      if (flashlightTimeLeft <= 0) {
+        stopFlashlightTimer();
+        showBatteryReplaceButton();
       }
-      gasMaskTime = 180;
+    }, 1000);
+  }
+
+  function stopFlashlightTimer() {
+    clearInterval(flashlightTimer);
+    flashlightTimer = null;
+    document.getElementById('flashlight-overlay').classList.remove('active', 'dim');
+  }
+
+  function showBatteryReplaceButton() {
+    const batteryCount = parseInt(document.getElementById('res-b').textContent, 10);
+    if (batteryCount > 0) {
+      const btn = document.getElementById('battery-replace');
+      btn.style.display = 'block';
+      btn.onclick = () => {
+        const newCount = batteryCount - 1;
+        document.getElementById('res-b').textContent = newCount;
+        btn.style.display = 'none';
+        startFlashlightTimer(30);
+      };
     }
-  }
-
-  // Tlačítka výměny baterie a filtru
-  flashlightBtn.addEventListener('click', () => {
-    if (resources.battery > 0) {
-      resources.battery--;
-      updateResourcesDisplay();
-      flashlightTime += 30;
-      if (flashlightTime > 60) flashlightTime = 60;
-      hideFlashlightReplaceBtn();
-    }
-  });
-
-  gasMaskBtn.addEventListener('click', () => {
-    if (resources.filter > 0) {
-      resources.filter--;
-      updateResourcesDisplay();
-      gasMaskTime += 60;
-      if (gasMaskTime > 180) gasMaskTime = 180;
-      hideGasMaskReplaceBtn();
-      gasMaskFog.classList.remove('foggy');
-    }
-  });
-
-  function showFlashlightReplaceBtn() {
-    if (resources.battery > 0) flashlightBtn.style.display = 'block';
-  }
-  function hideFlashlightReplaceBtn() {
-    flashlightBtn.style.display = 'none';
-  }
-
-  function showGasMaskReplaceBtn() {
-    if (resources.filter > 0) gasMaskBtn.style.display = 'block';
-  }
-  function hideGasMaskReplaceBtn() {
-    gasMaskBtn.style.display = 'none';
-  }
-
-  function updateResourcesDisplay() {
-    document.getElementById('res-b').textContent = resources.battery;
-    document.getElementById('res-f').textContent = resources.filter;
   }
 
   initTools();
-  updateResourcesDisplay();
-
 </script>
 </body>
 </html>
