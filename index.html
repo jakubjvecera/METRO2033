@@ -51,11 +51,19 @@
       box-shadow: inset 0 0 24px rgba(0,0,0,0.6);
       border-left:6px solid var(--accent);
       font-size:14px;
-      max-height:180px;
+      max-height:200px;
       overflow-y:auto;
       color: var(--green);
+      display:flex;
+      flex-direction:column;
     }
     .console-title{font-size:12px;color:#bdbdbd;margin-bottom:6px}
+    #status-msg{
+      margin-bottom:8px;
+      color:#ccc;
+      min-height:20px;
+      font-size:14px;
+    }
     #history{list-style:none;margin:0;padding:0;}
     #history li{padding:6px 8px;border-bottom:1px dashed rgba(255,255,255,0.03);}
     .resources{
@@ -105,9 +113,9 @@
     <section id="center">
       <div class="big-title">METRO 2033</div>
       <div id="console">
-        <div class="console-title">Historie kódů a stav</div>
+        <div class="console-title">Konzole</div>
+        <div id="status-msg"></div>
         <ul id="history"></ul>
-        <div id="status-msg" style="margin-top:8px;color:#ccc;min-height:20px;"></div>
       </div>
     </section>
 
@@ -208,10 +216,21 @@
         return;
       }
       switch(secondLetter){
-        case 'B': batteryCount += value; break;
-        case 'F': filterCount += value; break;
-        case 'W': waterCount += value; break;
-        default: statusMsg.textContent = 'Neznámý typ kódu.'; return;
+        case 'B':
+          batteryCount += value;
+          statusMsg.textContent = `Přidány baterie: ${value}`;
+          break;
+        case 'F':
+          filterCount += value;
+          statusMsg.textContent = `Přidány filtry: ${value}`;
+          break;
+        case 'W':
+          waterCount += value;
+          statusMsg.textContent = `Přidána voda: ${value}`;
+          break;
+        default:
+          statusMsg.textContent = 'Neznámý typ kódu.';
+          return;
       }
       updateResourcesPanel();
       let history = loadHistory();
@@ -222,7 +241,6 @@
         saveUsedCodes(usedCodes);
       }
       renderHistory();
-      statusMsg.textContent = `Kód ${code} přidán: ${value}`;
       input.value = '';
       input.focus();
     });
