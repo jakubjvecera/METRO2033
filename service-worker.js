@@ -1,25 +1,22 @@
-const CACHE_NAME = "metro-cache-v1";
+const CACHE_NAME = 'metro-cache-v1';
 const urlsToCache = [
-  "/",
-  "/index.html",
-  "/styles.css",
-  "/app.js",
-  "/manifest.json",
-  "/images/mapa.png",
-  "/images/bg-texture.jpg",
-  "/images/noise.png",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png"
+  './',
+  './index.html',
+  './manifest.json',
+  './placeholder-svitilna.svg',
+  './placeholder-mapa.svg'
 ];
 
-self.addEventListener("install", event => {
-  event.waitUntil(
+self.addEventListener('install', e => {
+  e.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
 });
 
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(response => {
+      return response || fetch(e.request);
+    })
   );
 });
