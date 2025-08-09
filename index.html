@@ -133,9 +133,7 @@
   <main id="app">
     <header class="topbar">
       <span>TERMINÁL • STANICE</span>
-      <div id="tools-container">
-        <!-- Tlačítka nástrojů se sem vloží JS -->
-      </div>
+      <div id="tools-container"><!-- tlačítka sem --></div>
       <span style="color:red;">OFFLINE</span>
     </header>
 
@@ -160,7 +158,7 @@
   </main>
 <script type="module" src="./app.js"></script>
 <script>
-   const tools = [
+  const tools = [
     { id: 'map', label: '🗺️', title: 'Mapa' },
     { id: 'flashlight', label: '🔦', title: 'Svítilna' },
     { id: 'gas-mask', label: '😷', title: 'Plynová maska' },
@@ -168,39 +166,65 @@
 
   function initTools() {
     const container = document.getElementById('tools-container');
+
+    // 1) Vytvoříme všechna tlačítka a přidáme je do DOM (bez listenerů)
     tools.forEach(tool => {
       const btn = document.createElement('button');
       btn.className = 'tool-button';
       btn.id = `tool-${tool.id}`;
+      btn.dataset.toolId = tool.id;
       btn.textContent = tool.label;
       btn.title = tool.title;
+      container.appendChild(btn);
+    });
 
+    // 2) Až teď přidáme posluchače — teď už jsou všechny elementy v DOM, takže getElementById vrátí prvek
+    tools.forEach(tool => {
+      const btn = document.getElementById(`tool-${tool.id}`);
+      if (!btn) return;
       btn.addEventListener('click', () => {
-        if (btn.classList.contains('active')) {
-          // Deaktivujeme tlačítko, pokud je již aktivní
+        const isActive = btn.classList.contains('active');
+
+        if (isActive) {
+          // Deaktivace tlačítka
           btn.classList.remove('active');
           deactivateToolEffect(tool.id);
+          setStatus(`${tool.title} deaktivována`);
         } else {
-          // Deaktivujeme všechny ostatní
-          document.querySelectorAll('.tool-button').forEach(b => b.classList.remove('active'));
-          // Aktivujeme kliknuté tlačítko
+          // Před aktivací zkontrolujeme vylučující pár: map <-> flashlight
+          if (tool.id === 'map') {
+            const other = document.getElementById('tool-flashlight');
+            if (other && other.classList.contains('active')) {
+              other.classList.remove('active');
+              deactivateToolEffect('flashlight');
+            }
+          } else if (tool.id === 'flashlight') {
+            const other = document.getElementById('tool-map');
+            if (other && other.classList.contains('active')) {
+              other.classList.remove('active');
+              deactivateToolEffect('map');
+            }
+          }
+
+          // Aktivujeme tlačítko (ostatní NEdeaktivujeme — více tlačítek může být aktivních)
           btn.classList.add('active');
           activateToolEffect(tool.id);
+          setStatus(`${tool.title} aktivována`);
         }
       });
-
-      container.appendChild(btn);
     });
   }
 
   function activateToolEffect(toolId) {
-    console.log(`Aktivován nástroj: ${toolId}`);
-    // Tady můžeš přidat kód pro aktivaci efektu nástroje
+    // placeholder pro pozdější efekty (vizuál / zvuk / stav)
+    console.log('activate', toolId);
   }
-
   function deactivateToolEffect(toolId) {
-    console.log(`Deaktivován nástroj: ${toolId}`);
-    // Tady můžeš přidat kód pro deaktivaci efektu nástroje
+    console.log('deactivate', toolId);
+  }
+  function setStatus(text) {
+    const el = document.getElementById('status-msg');
+    if (el) el.textContent = text;
   }
 
   window.addEventListener('DOMContentLoaded', () => {
