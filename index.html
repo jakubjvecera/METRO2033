@@ -140,17 +140,17 @@
 
     /* efekt svítilny */
     #flashlight-overlay {
-  position: fixed;
-  top: 56px; /* pod topbarem */
-  left: 0;
-  width: 100%;
-  height: calc(100% - 56px);
-  pointer-events: none;
-  background: radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0.85) 25%, rgba(0,0,0,0.95) 60%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 999;
-}
+      position: absolute;
+      top: 56px; /* pod topbarem */
+      left: 0;
+      width: 100%;
+      height: calc(100% - 56px);
+      pointer-events: none;
+      background: radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0.85) 25%, rgba(0,0,0,0.95) 60%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 999;
+    }
     #flashlight-overlay.active {
       opacity: 1;
     }
