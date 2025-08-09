@@ -195,162 +195,91 @@
 <script type="module" src="./app.js"></script>
 <script>
   const tools = [
-  { id: 'map', label: '🗺️', title: 'Mapa' },
-  { id: 'flashlight', label: '🔦', title: 'Svítilna' },
-  { id: 'gas-mask', label: '😷', title: 'Plynová maska' },
-];
-let activeTools = [];
-let flashlightTimer = null;
-let flashlightTimeLeft = 0;
+    { id: 'map', label: '🗺️', title: 'Mapa' },
+    { id: 'flashlight', label: '🔦', title: 'Svítilna' },
+    { id: 'gas-mask', label: '😷', title: 'Plynová maska' },
+  ];
+  let activeTools = [];
+  let flashlightTimer = null;
+  let flashlightTimeLeft = 0;
 
-function saveState() {
-  localStorage.setItem('flashlightTimeLeft', flashlightTimeLeft);
-  localStorage.setItem('batteryCount', document.getElementById('res-b').textContent);
-}
-
-function loadState() {
-  const storedTime = parseInt(localStorage.getItem('flashlightTimeLeft'), 10);
-  const storedBatteries = parseInt(localStorage.getItem('batteryCount'), 10);
-
-  if (!isNaN(storedBatteries)) {
-    document.getElementById('res-b').textContent = storedBatteries;
+  function initTools() {
+    const container = document.getElementById('tools-container');
+    tools.forEach(tool => {
+      const btn = document.createElement('button');
+      btn.className = 'tool-button';
+      btn.id = `tool-${tool.id}`;
+      btn.textContent = tool.label;
+      btn.title = tool.title;
+      btn.addEventListener('click', () => toggleTool(tool.id, btn));
+      container.appendChild(btn);
+    });
   }
 
-  if (!isNaN(storedTime) && storedTime > 0) {
-    flashlightTimeLeft = storedTime;
-    activateFlashlightButton();
-    startFlashlightTimer(flashlightTimeLeft);
+  function toggleTool(toolId, btn) {
+    if ((toolId === 'map' && activeTools.includes('flashlight')) ||
+        (toolId === 'flashlight' && activeTools.includes('map'))) {
+      return;
+    }
+    if (activeTools.includes(toolId)) {
+      activeTools = activeTools.filter(id => id !== toolId);
+      btn.classList.remove('active');
+      deactivateToolEffect(toolId);
+    } else {
+      activeTools.push(toolId);
+      btn.classList.add('active');
+      activateToolEffect(toolId);
+    }
   }
-}
 
-function initTools() {
-  const container = document.getElementById('tools-container');
-  tools.forEach(tool => {
-    const btn = document.createElement('button');
-    btn.className = 'tool-button';
-    btn.id = `tool-${tool.id}`;
-    btn.textContent = tool.label;
-    btn.title = tool.title;
-    btn.addEventListener('click', () => toggleTool(tool.id, btn));
-    container.appendChild(btn);
-  });
-}
-
-function toggleTool(toolId, btn) {
-  if ((toolId === 'map' && activeTools.includes('flashlight')) ||
-      (toolId === 'flashlight' && activeTools.includes('map'))) {
-    return;
-  }
-  if (activeTools.includes(toolId)) {
-    activeTools = activeTools.filter(id => id !== toolId);
-    btn.classList.remove('active');
-    deactivateToolEffect(toolId);
-  } else {
-    activeTools.push(toolId);
-    btn.classList.add('active');
-    activateToolEffect(toolId);
-  }
-}
-
-function activateToolEffect(toolId) {
-  if (toolId === 'flashlight') {
-    // Pokud čas už běží, nepřepisuj na 60, startni s aktuálním časem
-    if (flashlightTimeLeft <= 0) {
+  function activateToolEffect(toolId) {
+    if (toolId === 'flashlight') {
       startFlashlightTimer(60);
-    } else {
-      startFlashlightTimer(flashlightTimeLeft);
     }
   }
-}
 
-function deactivateToolEffect(toolId) {
-  if (toolId === 'flashlight') {
-    stopFlashlightTimer();
-    saveState();
-  }
-}
-
-function startFlashlightTimer(seconds) {
-  flashlightTimeLeft = seconds;
-  const overlay = document.getElementById('flashlight-overlay');
-  overlay.classList.add('active');
-  overlay.classList.remove('dim');
-  hideBatteryReplaceButton();
-
-  if (flashlightTimer) clearInterval(flashlightTimer);
-
-  flashlightTimer = setInterval(() => {
-    flashlightTimeLeft--;
-
-    if (flashlightTimeLeft <= 10 && flashlightTimeLeft > 0) {
-      overlay.classList.add('dim');
-    } else {
-      overlay.classList.remove('dim');
-    }
-
-    saveState();
-
-    if (flashlightTimeLeft <= 0) {
+  function deactivateToolEffect(toolId) {
+    if (toolId === 'flashlight') {
       stopFlashlightTimer();
-      showBatteryReplaceButton();
-      deactivateFlashlightButton();
     }
-  }, 1000);
-
-  saveState();
-}
-
-function stopFlashlightTimer() {
-  clearInterval(flashlightTimer);
-  flashlightTimer = null;
-  flashlightTimeLeft = 0;
-  const overlay = document.getElementById('flashlight-overlay');
-  overlay.classList.remove('active', 'dim');
-  saveState();
-}
-
-function showBatteryReplaceButton() {
-  const batteryCount = parseInt(document.getElementById('res-b').textContent, 10);
-  if (batteryCount > 0) {
-    const btn = document.getElementById('battery-replace');
-    btn.style.display = 'block';
-    btn.onclick = () => {
-      const newCount = batteryCount - 1;
-      document.getElementById('res-b').textContent = newCount;
-      btn.style.display = 'none';
-      activateFlashlightButton();
-      startFlashlightTimer(30);
-      saveState();
-    };
   }
-}
 
-function hideBatteryReplaceButton() {
-  const btn = document.getElementById('battery-replace');
-  btn.style.display = 'none';
-  btn.onclick = null;
-}
-
-function deactivateFlashlightButton() {
-  const btn = document.getElementById('tool-flashlight');
-  if (btn) {
-    btn.classList.remove('active');
-    activeTools = activeTools.filter(id => id !== 'flashlight');
+  function startFlashlightTimer(seconds) {
+    flashlightTimeLeft = seconds;
+    document.getElementById('flashlight-overlay').classList.add('active');
+    flashlightTimer = setInterval(() => {
+      flashlightTimeLeft--;
+      if (flashlightTimeLeft <= 10) {
+        document.getElementById('flashlight-overlay').classList.add('dim');
+      }
+      if (flashlightTimeLeft <= 0) {
+        stopFlashlightTimer();
+        showBatteryReplaceButton();
+      }
+    }, 1000);
   }
-  saveState();
-}
 
-function activateFlashlightButton() {
-  const btn = document.getElementById('tool-flashlight');
-  if (btn) {
-    btn.classList.add('active');
-    if (!activeTools.includes('flashlight')) activeTools.push('flashlight');
+  function stopFlashlightTimer() {
+    clearInterval(flashlightTimer);
+    flashlightTimer = null;
+    document.getElementById('flashlight-overlay').classList.remove('active', 'dim');
   }
-  saveState();
-}
 
-initTools();
-loadState();
+  function showBatteryReplaceButton() {
+    const batteryCount = parseInt(document.getElementById('res-b').textContent, 10);
+    if (batteryCount > 0) {
+      const btn = document.getElementById('battery-replace');
+      btn.style.display = 'block';
+      btn.onclick = () => {
+        const newCount = batteryCount - 1;
+        document.getElementById('res-b').textContent = newCount;
+        btn.style.display = 'none';
+        startFlashlightTimer(30);
+      };
+    }
+  }
+
+  initTools();
 </script>
 </body>
 </html>
