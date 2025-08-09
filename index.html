@@ -167,45 +167,37 @@
   ];
 
   function initTools() {
-    const container = document.getElementById('tools-container');
-    tools.forEach(tool => {
-      const btn = document.createElement('button');
-      btn.className = 'tool-button';
-      btn.id = `tool-${tool.id}`;
-      btn.textContent = tool.label;
-      btn.title = tool.title;
+  const container = document.getElementById('tools-container');
+  tools.forEach(tool => {
+    const btn = document.createElement('button');
+    btn.className = 'tool-button';
+    btn.id = `tool-${tool.id}`;
+    btn.textContent = tool.label;
+    btn.title = tool.title;
 
-      btn.addEventListener('click', () => {
-        if (btn.classList.contains('active')) {
-          // Deaktivujeme tlačítko, pokud je již aktivní
-          btn.classList.remove('active');
-          deactivateToolEffect(tool.id);
-        } else {
-          // Deaktivujeme všechny ostatní
-          document.querySelectorAll('.tool-button').forEach(b => b.classList.remove('active'));
-          // Aktivujeme kliknuté tlačítko
-          btn.classList.add('active');
-          activateToolEffect(tool.id);
+    btn.addEventListener('click', () => {
+      const isActive = btn.classList.contains('active');
+
+      if (isActive) {
+        btn.classList.remove('active');
+        deactivateToolEffect(tool.id);
+      } else {
+        // Pravidlo: mapa a svítilna nemůžou být aktivní zároveň
+        if (tool.id === 'map') {
+          document.getElementById('tool-flashlight').classList.remove('active');
         }
-      });
+        if (tool.id === 'flashlight') {
+          document.getElementById('tool-map').classList.remove('active');
+        }
 
-      container.appendChild(btn);
+        btn.classList.add('active');
+        activateToolEffect(tool.id);
+      }
     });
-  }
 
-  function activateToolEffect(toolId) {
-    console.log(`Aktivován nástroj: ${toolId}`);
-    // Tady můžeš přidat kód pro aktivaci efektu nástroje
-  }
-
-  function deactivateToolEffect(toolId) {
-    console.log(`Deaktivován nástroj: ${toolId}`);
-    // Tady můžeš přidat kód pro deaktivaci efektu nástroje
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    initTools();
+    container.appendChild(btn);
   });
+}
 </script>
 </body>
 </html>
