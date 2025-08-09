@@ -200,11 +200,32 @@
         statusMsg.textContent = 'Zadej kód!';
         return;
       }
+
+      // 🔹 Speciální resetovací kód
+      if(code === 'RESET'){
+        const ok = confirm('Opravdu chceš vymazat veškerá lokální data? (Historie, použité kódy, zásoby)');
+        if(ok){
+          localStorage.removeItem(STORAGE_HISTORY_KEY);
+          localStorage.removeItem(STORAGE_USED_CODES_KEY);
+          batteryCount = 0;
+          filterCount = 0;
+          waterCount = 0;
+          updateResourcesPanel();
+          renderHistory();
+          statusMsg.textContent = 'Lokální data byla vymazána.';
+        } else {
+          statusMsg.textContent = 'Reset zrušen.';
+        }
+        input.value = '';
+        return;
+      }
+
       if(!codesDB[code]){
         statusMsg.textContent = 'Neplatný kód.';
         input.value = '';
         return;
       }
+
       const value = codesDB[code];
       const firstLetter = code.charAt(0);
       const secondLetter = code.charAt(1);
@@ -214,6 +235,7 @@
         input.value = '';
         return;
       }
+
       switch(secondLetter){
         case 'B':
           batteryCount += value;
@@ -231,6 +253,7 @@
           statusMsg.textContent = 'Neznámý typ kódu.';
           return;
       }
+
       updateResourcesPanel();
       let history = loadHistory();
       history.push({code, t: Date.now()});
