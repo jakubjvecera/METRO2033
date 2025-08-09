@@ -23,6 +23,16 @@
       align-items:stretch;
       justify-content:center;
     }
+    #app{
+      width:100%;
+      max-width:900px;
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+      position: relative;
+    }
+
+    /* tlačítka nástrojů */
     #tools-container {
       display: flex;
       gap: 8px;
@@ -42,35 +52,14 @@
       cursor: pointer;
       user-select: none;
       border-radius: 4px;
-      transition: background 0.2s ease, color 0.2s ease;
+      transition: background 0.2s ease;
     }
     .tool-button.active {
       background: var(--accent);
       color: #fff;
     }
-#flashlight-overlay {
-  position: absolute;
-  top: 56px; /* výška topbaru */
-  left: 0;
-  width: 100%;
-  height: calc(100% - 56px);
-  pointer-events: none;
-  background: radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 20%, rgba(0,0,0,0.95) 60%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 10;
-}
-#flashlight-overlay.active {
-  opacity: 1;
-}
 
-    #app{
-      width:100%;
-      max-width:900px;
-      height:100vh;
-      display:flex;
-      flex-direction:column;
-    }
+    /* horní lišta */
     .topbar{
       height:56px;
       display:flex;
@@ -80,6 +69,8 @@
       background: linear-gradient(90deg, rgba(20,20,20,0.9), rgba(10,10,10,0.85));
       border-bottom:2px solid rgba(139,0,0,0.6);
     }
+
+    /* konzole */
     #center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
     .big-title{font-size:42px;letter-spacing:3px;color:#bfbfbf}
     #console{
@@ -107,6 +98,8 @@
     }
     #history{list-style:none;margin:0;padding:0;}
     #history li{padding:6px 8px;border-bottom:1px dashed rgba(255,255,255,0.03);}
+
+    /* suroviny */
     .resources{
       display:flex;
       justify-content:center;
@@ -118,6 +111,8 @@
       font-size:14px;
     }
     .resources span{color:var(--green);}
+
+    /* formulář pro kódy */
     #code-form{
       display:flex;
       gap:8px;
@@ -142,13 +137,30 @@
       cursor:pointer;
       font-weight:700;
     }
+
+    /* efekt svítilny */
+    #flashlight-overlay {
+      position: absolute;
+      top: 56px; /* pod topbarem */
+      left: 0;
+      width: 100%;
+      height: calc(100% - 56px);
+      pointer-events: none;
+      background: radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0.85) 25%, rgba(0,0,0,0.95) 60%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 10;
+    }
+    #flashlight-overlay.active {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
   <main id="app">
     <header class="topbar">
       <span>TERMINÁL • STANICE</span>
-      <div id="tools-container"><!-- tlačítka sem --></div>
+      <div id="tools-container"></div>
       <span style="color:red;">OFFLINE</span>
     </header>
 
@@ -159,7 +171,9 @@
         <ul id="history"></ul>
       </div>
     </section>
-<div id="flashlight-overlay"></div>
+
+    <!-- efekt svítilny -->
+    <div id="flashlight-overlay"></div>
 
     <div class="resources">
       <div>Baterie: <span id="res-b">0</span></div>
@@ -172,92 +186,62 @@
       <button id="code-submit" type="submit">OK</button>
     </form>
   </main>
-<script type="module" src="./app.js"></script>
-<script>
-  const tools = [
-    { id: 'map', label: '🗺️', title: 'Mapa' },
-    { id: 'flashlight', label: '🔦', title: 'Svítilna' },
-    { id: 'gas-mask', label: '😷', title: 'Plynová maska' },
-  ];
 
-  function initTools() {
-    const container = document.getElementById('tools-container');
+  <script>
+    const tools = [
+      { id: 'map', label: '🗺️', title: 'Mapa' },
+      { id: 'flashlight', label: '🔦', title: 'Svítilna' },
+      { id: 'gas-mask', label: '😷', title: 'Plynová maska' },
+    ];
 
-    // 1) Vytvoříme všechna tlačítka a přidáme je do DOM (bez listenerů)
-    tools.forEach(tool => {
-      const btn = document.createElement('button');
-      btn.className = 'tool-button';
-      btn.id = `tool-${tool.id}`;
-      btn.dataset.toolId = tool.id;
-      btn.textContent = tool.label;
-      btn.title = tool.title;
-      container.appendChild(btn);
-    });
+    let activeTools = [];
 
-    // 2) Až teď přidáme posluchače — teď už jsou všechny elementy v DOM, takže getElementById vrátí prvek
-    tools.forEach(tool => {
-      const btn = document.getElementById(`tool-${tool.id}`);
-      if (!btn) return;
-      btn.addEventListener('click', () => {
-        const isActive = btn.classList.contains('active');
+    function initTools() {
+      const container = document.getElementById('tools-container');
+      tools.forEach(tool => {
+        const btn = document.createElement('button');
+        btn.className = 'tool-button';
+        btn.id = `tool-${tool.id}`;
+        btn.textContent = tool.label;
+        btn.title = tool.title;
 
-        if (isActive) {
-          // Deaktivace tlačítka
-          btn.classList.remove('active');
-          deactivateToolEffect(tool.id);
-          setStatus(`${tool.title} deaktivována`);
-        } else {
-          // Před aktivací zkontrolujeme vylučující pár: map <-> flashlight
-          if (tool.id === 'map') {
-            const other = document.getElementById('tool-flashlight');
-            if (other && other.classList.contains('active')) {
-              other.classList.remove('active');
-              deactivateToolEffect('flashlight');
-            }
-          } else if (tool.id === 'flashlight') {
-            const other = document.getElementById('tool-map');
-            if (other && other.classList.contains('active')) {
-              other.classList.remove('active');
-              deactivateToolEffect('map');
-            }
-          }
+        btn.addEventListener('click', () => toggleTool(tool.id, btn));
 
-          // Aktivujeme tlačítko (ostatní NEdeaktivujeme — více tlačítek může být aktivních)
-          btn.classList.add('active');
-          activateToolEffect(tool.id);
-          setStatus(`${tool.title} aktivována`);
-        }
+        container.appendChild(btn);
       });
-    });
-  }
+    }
 
-  function activateToolEffect(toolId) {
-    // placeholder pro pozdější efekty (vizuál / zvuk / stav)
-    console.log('activate', toolId);
-  }
-  function deactivateToolEffect(toolId) {
-    console.log('deactivate', toolId);
-  }
-  function setStatus(text) {
-    const el = document.getElementById('status-msg');
-    if (el) el.textContent = text;
-  }
+    function toggleTool(toolId, btn) {
+      // zákaz současné aktivace mapy a svítilny
+      if ((toolId === 'map' && activeTools.includes('flashlight')) ||
+          (toolId === 'flashlight' && activeTools.includes('map'))) {
+        return;
+      }
 
-  window.addEventListener('DOMContentLoaded', () => {
-    initTools();
+      if (activeTools.includes(toolId)) {
+        activeTools = activeTools.filter(id => id !== toolId);
+        btn.classList.remove('active');
+        deactivateToolEffect(toolId);
+      } else {
+        activeTools.push(toolId);
+        btn.classList.add('active');
+        activateToolEffect(toolId);
+      }
+    }
+
     function activateToolEffect(toolId) {
-  if (toolId === 'flashlight') {
-    document.getElementById('flashlight-overlay').classList.add('active');
-  }
-}
+      if (toolId === 'flashlight') {
+        document.getElementById('flashlight-overlay').classList.add('active');
+      }
+    }
 
-function deactivateToolEffect(toolId) {
-  if (toolId === 'flashlight') {
-    document.getElementById('flashlight-overlay').classList.remove('active');
-  }
-}
+    function deactivateToolEffect(toolId) {
+      if (toolId === 'flashlight') {
+        document.getElementById('flashlight-overlay').classList.remove('active');
+      }
+    }
 
-  });
-</script>
+    initTools();
+  </script>
 </body>
 </html>
