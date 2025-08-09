@@ -133,6 +133,7 @@
   <script>
     const STORAGE_HISTORY_KEY = 'metro_codes_history_v1';
     const STORAGE_USED_CODES_KEY = 'metro_used_codes_v1';
+    const STORAGE_RESOURCES_KEY = 'metro_resources_v1';
 
     let codesDB = {};
     let batteryCount = 0;
@@ -159,6 +160,25 @@
     function saveUsedCodes(arr){
       localStorage.setItem(STORAGE_USED_CODES_KEY, JSON.stringify(arr));
     }
+
+    function loadResources(){
+      try {
+        const r = JSON.parse(localStorage.getItem(STORAGE_RESOURCES_KEY));
+        if(r){
+          batteryCount = r.b || 0;
+          filterCount = r.f || 0;
+          waterCount = r.w || 0;
+        }
+      } catch {}
+    }
+    function saveResources(){
+      localStorage.setItem(STORAGE_RESOURCES_KEY, JSON.stringify({
+        b: batteryCount,
+        f: filterCount,
+        w: waterCount
+      }));
+    }
+
     function renderHistory(){
       const list = loadHistory();
       hist.innerHTML = '';
@@ -180,6 +200,7 @@
       resB.textContent = batteryCount;
       resF.textContent = filterCount;
       resW.textContent = waterCount;
+      saveResources();
     }
     async function loadCodesDB(){
       try {
@@ -201,20 +222,21 @@
         return;
       }
 
-      // 🔹 Speciální resetovací kód
-      if(code === 'RESET'){
-        const ok = confirm('Opravdu chceš vymazat veškerá lokální data? (Historie, použité kódy, zásoby)');
-        if(ok){
-          localStorage.removeItem(STORAGE_HISTORY_KEY);
-          localStorage.removeItem(STORAGE_USED_CODES_KEY);
+      // Resetovací kód AZ4658 s potvrzením
+      if(code === 'AZ4658'){
+        if(confirm('Opravdu chceš vymazat celou lokální paměť? Tato akce je nevratná.')){
+          localStorage.clear();
           batteryCount = 0;
           filterCount = 0;
           waterCount = 0;
+          saveResources();
           updateResourcesPanel();
+          saveHistory([]);
+          saveUsedCodes([]);
           renderHistory();
-          statusMsg.textContent = 'Lokální data byla vymazána.';
+          statusMsg.textContent = 'Lokální paměť byla vymazána.';
         } else {
-          statusMsg.textContent = 'Reset zrušen.';
+          statusMsg.textContent = 'Vymazání zrušeno.';
         }
         input.value = '';
         return;
@@ -230,6 +252,7 @@
       const firstLetter = code.charAt(0);
       const secondLetter = code.charAt(1);
       const usedCodes = loadUsedCodes();
+
       if(firstLetter === 'U' && usedCodes.includes(code)){
         statusMsg.textContent = 'Tento kód již byl použit.';
         input.value = '';
@@ -251,17 +274,21 @@
           break;
         default:
           statusMsg.textContent = 'Neznámý typ kódu.';
+          input.value = '';
           return;
       }
 
       updateResourcesPanel();
+
       let history = loadHistory();
       history.push({code, t: Date.now()});
       saveHistory(history);
+
       if(firstLetter === 'U'){
         usedCodes.push(code);
         saveUsedCodes(usedCodes);
       }
+
       renderHistory();
       input.value = '';
       input.focus();
@@ -269,6 +296,7 @@
 
     (async()=>{
       await loadCodesDB();
+      loadResources();
       renderHistory();
       updateResourcesPanel();
     })();
