@@ -1,68 +1,54 @@
-let flashlightTime = parseInt(localStorage.getItem("flashlightTime")) || 30;
-let flashlightActive = false;
-let flashlightInterval;
+// app.js
+import { loadCodesDB, isValidCode, processCode } from './codes.js';
+import { renderHistory, setStatus, updateResourcesPanel } from './console.js';
+import { loadResources, resetResources } from './resources.js';
+import { resetHistory } from './history.js';
 
-const flashlightBtn = document.getElementById("flashlight-btn");
-const mapBtn = document.getElementById("map-btn");
-const content = document.getElementById("content");
-const flashlightScreen = document.getElementById("flashlight-screen");
-const timer = document.getElementById("timer");
+const form = document.getElementById('code-form');
+const input = document.getElementById('code-input');
 
-const codeInput = document.getElementById("code-input");
-const codeSubmit = document.getElementById("code-submit");
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  const code = input.value.trim().toUpperCase();
 
-// Kódy a jejich efekty
-const codes = {
-    "BATERKA": () => { flashlightTime += 30; saveTime(); alert("+30s svítilny"); },
-};
+  if(!code){
+    setStatus('Zadej kód!');
+    return;
+  }
 
-// Uložit čas
-function saveTime() {
-    localStorage.setItem("flashlightTime", flashlightTime);
-}
-
-// Aktualizace časovače
-function updateTimer() {
-    timer.textContent = flashlightTime + "s";
-}
-
-// Zapnutí/vypnutí svítilny
-flashlightBtn.addEventListener("click", () => {
-    if (!flashlightActive && flashlightTime > 0) {
-        flashlightActive = true;
-        flashlightScreen.style.display = "flex";
-        updateTimer();
-        flashlightInterval = setInterval(() => {
-            flashlightTime--;
-            updateTimer();
-            saveTime();
-            if (flashlightTime <= 0) {
-                clearInterval(flashlightInterval);
-                flashlightActive = false;
-                flashlightScreen.style.display = "none";
-            }
-        }, 1000);
+  if(code === 'AZ4658'){
+    if(confirm('Opravdu chceš vymazat celou lokální paměť? Tato akce je nevratná.')){
+      localStorage.clear();
+      resetResources();
+      resetHistory();
+      renderHistory();
+      updateResourcesPanel();
+      setStatus('Lokální paměť byla vymazána.');
     } else {
-        flashlightActive = false;
-        flashlightScreen.style.display = "none";
-        clearInterval(flashlightInterval);
+      setStatus('Vymazání zrušeno.');
     }
+    input.value = '';
+    return;
+  }
+
+  if(!isValidCode(code)){
+    setStatus('Neplatný kód.');
+    input.value = '';
+    return;
+  }
+
+  if(processCode(code)){
+    input.value = '';
+  } else {
+    input.value = '';
+  }
+  input.focus();
 });
 
-// Mapa
-mapBtn.addEventListener("click", () => {
-    content.innerHTML = `<div style="border:4px solid #550000;padding:5px;background:#111;">
-        <img src="images/mapa.png" style="width:100%;border:2px solid #333;">
-    </div>`;
-});
-
-// Zadání kódu
-codeSubmit.addEventListener("click", () => {
-    const code = codeInput.value.trim().toUpperCase();
-    if (codes[code]) {
-        codes[code]();
-    } else {
-        alert("Neplatný kód");
-    }
-    codeInput.value = "";
-});
+(async () => {
+  await loadCodesDB();
+  loadResources();
+  renderHistory();
+  updateResourcesPanel();
+  input.focus();
+})();
