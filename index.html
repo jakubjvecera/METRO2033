@@ -48,6 +48,21 @@
       background: var(--accent);
       color: #fff;
     }
+#flashlight-overlay {
+  position: absolute;
+  top: 56px; /* výška topbaru */
+  left: 0;
+  width: 100%;
+  height: calc(100% - 56px);
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 20%, rgba(0,0,0,0.95) 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+#flashlight-overlay.active {
+  opacity: 1;
+}
 
     #app{
       width:100%;
@@ -144,6 +159,7 @@
         <ul id="history"></ul>
       </div>
     </section>
+<div id="flashlight-overlay"></div>
 
     <div class="resources">
       <div>Baterie: <span id="res-b">0</span></div>
@@ -229,6 +245,18 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     initTools();
+    function activateToolEffect(toolId) {
+  if (toolId === 'flashlight') {
+    document.getElementById('flashlight-overlay').classList.add('active');
+  }
+}
+
+function deactivateToolEffect(toolId) {
+  if (toolId === 'flashlight') {
+    document.getElementById('flashlight-overlay').classList.remove('active');
+  }
+}
+
   });
 </script>
 </body>
