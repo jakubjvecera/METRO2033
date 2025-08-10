@@ -21,12 +21,3 @@ export function decreaseBattery() {
 export function resetBattery(defaultValue = 3) {
   setBatteryCount(defaultValue);
 }
-
-// Původní funkce pro resource management:
-export function loadResources() {
-  // Zde načti další resources, pokud je máš
-}
-
-export function resetResources() {
-  // Resetuj další resources, pokud je máš
-}
