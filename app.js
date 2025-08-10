@@ -61,10 +61,10 @@ function hideBatteryReplaceButton() {
 }
 
 if (flashlightBtn) {
-  let timeLeft = Number(localStorage.getItem("flashlightTimeLeft")); 
-  if (timeLeft > 0) {
-    flashlightBtn.addEventListener('click', () => {
-      if (flashlightActive) {
+      flashlightBtn.addEventListener('click', () => {
+      let timeLeft = Number(localStorage.getItem("flashlightTimeLeft"));
+        if (timeLeft > 0){
+        if (flashlightActive) {
         flashlightOff();
         flashlightActive = false;
         flashlightBtn.classList.remove('active');
@@ -78,10 +78,12 @@ if (flashlightBtn) {
         flashlightActive = true;
         flashlightBtn.classList.add('active');
       }
-    });
+    }else{
+        showBatteryReplaceButton();
+      }
+      });
   }
   setStatus(`Svítilna zbývá: ${getTimeLeft()} s`);
-  showBatteryReplaceButton();
 }
 
 // Handler pro tlačítko výměny baterie
