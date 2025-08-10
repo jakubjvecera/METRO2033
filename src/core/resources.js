@@ -35,7 +35,7 @@ export function addWater(amount) {
 export function getResources() {
   return { batteryCount, filterCount, waterCount };
 }
-export function addBattery(amount) {
+export function dBattery(amount) {
   batteryCount -= amount;
   saveResources();
 }
