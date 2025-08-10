@@ -1,6 +1,6 @@
 import { loadCodesDB, isValidCode, processCode } from './codes.js';
 import { renderHistory, setStatus, updateResourcesPanel } from './console.js';
-import { loadResources, resetResources, dBattery, getBattery } from './resources.js';
+import { loadResources, resetResources, deBattery, getBattery } from './resources.js';
 import { resetHistory } from './history.js';
 import { activate as flashlightOn, deactivate as flashlightOff, getTimeLeft } from './src/mechanics/flashlight.js';
 
