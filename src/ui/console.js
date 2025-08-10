@@ -1,13 +1,3 @@
-// console.js
-import { loadHistory, saveHistory } from './history.js';
-import { getResources } from './resources.js';
-
-const hist = document.getElementById('history');
-const statusMsg = document.getElementById('status-msg');
-const resB = document.getElementById('res-b');
-const resF = document.getElementById('res-f');
-const resW = document.getElementById('res-w');
-
 export function renderHistory() {
   const list = loadHistory();
   hist.innerHTML = '';
