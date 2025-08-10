@@ -62,24 +62,29 @@ function hideBatteryReplaceButton() {
 
 if (flashlightBtn) {
   flashlightBtn.addEventListener('click', () => {
+    // Zjisti čas z úložiště
+    const time = getTimeLeft();
     if (flashlightActive) {
       flashlightOff();
       flashlightActive = false;
       flashlightBtn.classList.remove('active');
       hideBatteryReplaceButton();
-    } else {
-      flashlightOn(45, () => { // Výchozí čas svítilny
+    } else if (time > 0) {
+      flashlightOn(time, () => {
         flashlightActive = false;
         flashlightBtn.classList.remove('active');
         showBatteryReplaceButton();
-      });
+      }, true); // forceNewTime = true pro čisté nastavení
       flashlightActive = true;
       flashlightBtn.classList.add('active');
+      setStatus(`Svítilna zbývá: ${getTimeLeft()} s`);
+    } else {
+      // Pokud je čas ≤ 0, svítilna se nezapne, zobraz tlačítko vyměny baterie
+      showBatteryReplaceButton();
+      setStatus('Baterie je vybitá, vyměň ji!');
     }
-    setStatus(`Svítilna zbývá: ${getTimeLeft()} s`);
   });
 }
-
 // Handler pro tlačítko výměny baterie
 if (batteryReplaceBtn) {
   batteryReplaceBtn.addEventListener('click', () => {
