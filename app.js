@@ -76,7 +76,7 @@ if (flashlightBtn) {
       })};
       flashlightActive = true;
       flashlightBtn.classList.add('active');
-    }}
+    })}
     setStatus(`Svítilna zbývá: ${getTimeLeft()} s`);
   });
 }
