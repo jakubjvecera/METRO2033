@@ -81,9 +81,8 @@ if (flashlightBtn) {
     });
   }
   setStatus(`Svítilna zbývá: ${getTimeLeft()} s`);
-}else{
-    showBatteryReplaceButton();
-  }
+  showBatteryReplaceButton();
+}
 
 // Handler pro tlačítko výměny baterie
 if (batteryReplaceBtn) {
