@@ -36,7 +36,7 @@ export function getResources() {
   return { batteryCount, filterCount, waterCount };
 }
 
-export function dBattery(amount) {
+export function deBattery(amount) {
   batteryCount = Math.max(0, batteryCount - amount);
   saveResources();
 }
