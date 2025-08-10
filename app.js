@@ -21,16 +21,19 @@ form.addEventListener('submit', e => {
   }
 
   if(code === 'AZ4658'){
-    if(confirm('Opravdu chceš vymazat celou lokální paměť? Tato akce je nevratná.')){
-      localStorage.clear();
-      resetResources();
-      resetHistory();
-      renderHistory();
-      updateResourcesPanel();
-      setStatus('Lokální paměť byla vymazána.');
-    } else {
-      setStatus('Vymazání zrušeno.');
+    // Reset všeho v localStorage včetně svítilny
+    localStorage.clear();
+    resetResources();
+    resetHistory();
+    renderHistory();
+    updateResourcesPanel();
+    if (flashlightActive) {
+      flashlightOff();
+      flashlightActive = false;
+      if (flashlightBtn) flashlightBtn.classList.remove('active');
     }
+    if (batteryReplaceBtn) batteryReplaceBtn.style.display = 'none';
+    setStatus('Lokální paměť byla vymazána.');
     input.value = '';
     return;
   }
@@ -65,7 +68,7 @@ if (flashlightBtn) {
       flashlightBtn.classList.remove('active');
       hideBatteryReplaceButton();
     } else {
-      flashlightOn(60, () => {
+      flashlightOn(45, () => { // Výchozí čas svítilny
         flashlightActive = false;
         flashlightBtn.classList.remove('active');
         showBatteryReplaceButton();
@@ -87,8 +90,7 @@ if (batteryReplaceBtn) {
       hideBatteryReplaceButton();
       flashlightBtn.classList.add('active');
       flashlightActive = true;
-      // Znovu zapnout svítilnu, např. na 30 sekund
-      flashlightOn(30, () => {
+      flashlightOn(30, () => { // Po výměně 30 sekund
         flashlightActive = false;
         flashlightBtn.classList.remove('active');
         showBatteryReplaceButton();
