@@ -1,21 +1,13 @@
-export function loadJSON(key, def = {}) {
-  try {
-    const val = localStorage.getItem(key);
-    return val ? JSON.parse(val) : def;
-  } catch {
-    return def;
-  }
-}
-
-export function saveJSON(key, value) {
+export function save(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-export function load(key, def) {
+export function load(key, defaultValue) {
   const val = localStorage.getItem(key);
-  return val !== null ? Number(val) : def;
-}
-
-export function save(key, value) {
-  localStorage.setItem(key, String(value));
+  if (val === null) return defaultValue;
+  try {
+    return JSON.parse(val);
+  } catch {
+    return defaultValue;
+  }
 }
