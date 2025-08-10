@@ -1,32 +1,44 @@
-const LS_KEY_BATTERY = 'batteryCount';
+import { loadJSON, saveJSON } from './storage.js';
 
-export function getBatteryCount(defaultValue = 3) {
-  const val = localStorage.getItem(LS_KEY_BATTERY);
-  return val !== null ? parseInt(val, 10) : defaultValue;
-}
+const STORAGE_KEY = 'metro_resources_v1';
 
-export function setBatteryCount(count) {
-  localStorage.setItem(LS_KEY_BATTERY, count);
-}
+let batteryCount = 0;
+let filterCount = 0;
+let waterCount = 0;
 
-export function decreaseBattery() {
-  const count = getBatteryCount();
-  if (count > 0) {
-    setBatteryCount(count - 1);
-    return count - 1;
-  }
-  return 0;
-}
-
-export function resetBattery(defaultValue = 3) {
-  setBatteryCount(defaultValue);
-}
-
-// Původní funkce pro resource management:
 export function loadResources() {
-  // Zde načti další resources, pokud je máš
+  const r = loadJSON(STORAGE_KEY, { b: 0, f: 0, w: 0 });
+  batteryCount = r.b;
+  filterCount = r.f;
+  waterCount = r.w;
+}
+
+export function saveResources() {
+  saveJSON(STORAGE_KEY, { b: batteryCount, f: filterCount, w: waterCount });
+}
+
+export function addBattery(amount) {
+  batteryCount += amount;
+  saveResources();
+}
+
+export function addFilter(amount) {
+  filterCount += amount;
+  saveResources();
+}
+
+export function addWater(amount) {
+  waterCount += amount;
+  saveResources();
+}
+
+export function getResources() {
+  return { batteryCount, filterCount, waterCount };
 }
 
 export function resetResources() {
-  // Resetuj další resources, pokud je máš
+  batteryCount = 0;
+  filterCount = 0;
+  waterCount = 0;
+  saveResources();
 }
