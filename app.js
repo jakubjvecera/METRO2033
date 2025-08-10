@@ -1,6 +1,6 @@
 import { loadCodesDB, isValidCode, processCode } from './codes.js';
 import { renderHistory, setStatus, updateResourcesPanel } from './console.js';
-import { loadResources, resetResources, dBattery, getBattery, getFilter, getWater } from './resources.js';
+import { loadResources, resetResources, getBatteryCount, setBatteryCount, decreaseBattery, resetBattery } from './resources.js';
 import { resetHistory } from './history.js';
 import { activate as flashlightOn, deactivate as flashlightOff, getTimeLeft } from './src/mechanics/flashlight.js';
 
@@ -8,13 +8,13 @@ const form = document.getElementById('code-form');
 const input = document.getElementById('code-input');
 const flashlightBtn = document.getElementById('tool-flashlight');
 const batteryReplaceBtn = document.getElementById('battery-replace');
-const batterySpan = document.getElementById('res-b');
 let flashlightActive = false;
 
-// Synchronizace počtu baterií do UI
+// Synchronizace počtu baterií s DOM
 function syncBatteryDisplay() {
+  const batterySpan = document.getElementById('res-b');
   if (batterySpan) {
-    batterySpan.textContent = getBattery();
+    batterySpan.textContent = getBatteryCount();
   }
 }
 
@@ -29,12 +29,13 @@ form.addEventListener('submit', e => {
   }
 
   if(code === 'AZ4658'){
-    // Reset všeho v localStorage včetně svítilny
+    // Reset všeho v localStorage včetně svítilny a baterií
     localStorage.clear();
     resetResources();
     resetHistory();
     renderHistory();
     updateResourcesPanel();
+    resetBattery();
     syncBatteryDisplay();
     if (flashlightActive) {
       flashlightOff();
@@ -55,10 +56,8 @@ form.addEventListener('submit', e => {
 
   if(processCode(code)){
     input.value = '';
-    syncBatteryDisplay();
   } else {
     input.value = '';
-    syncBatteryDisplay();
   }
   input.focus();
 });
@@ -71,7 +70,6 @@ function hideBatteryReplaceButton() {
   if (batteryReplaceBtn) batteryReplaceBtn.style.display = 'none';
 }
 
-// Svítilna logika
 if (flashlightBtn) {
   flashlightBtn.addEventListener('click', () => {
     const time = getTimeLeft();
@@ -99,9 +97,9 @@ if (flashlightBtn) {
 // Handler pro tlačítko výměny baterie
 if (batteryReplaceBtn) {
   batteryReplaceBtn.addEventListener('click', () => {
-    const currentBattery = getBattery();
-    if (currentBattery > 0) {
-      dBattery(1);
+    let count = getBatteryCount();
+    if (count > 0) {
+      const newCount = decreaseBattery();
       syncBatteryDisplay();
       hideBatteryReplaceButton();
       flashlightBtn.classList.add('active');
