@@ -5,6 +5,7 @@ const urlsToCache = [
   './manifest.json',
   './placeholder-svitilna.svg',
   './placeholder-mapa.svg'
+  './codes-db.json'
 ];
 
 self.addEventListener('install', event => {
