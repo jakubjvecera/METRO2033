@@ -15,12 +15,12 @@ form.addEventListener('submit', e => {
   e.preventDefault();
   const code = input.value.trim().toUpperCase();
 
-  if(!code){
+  if (!code) {
     setStatus('Zadej kód!');
     return;
   }
 
-  if(code === 'AZ4658'){
+  if (code === 'AZ4658') {
     // Reset všeho v localStorage včetně svítilny
     localStorage.clear();
     resetResources();
@@ -38,13 +38,13 @@ form.addEventListener('submit', e => {
     return;
   }
 
-  if(!isValidCode(code)){
+  if (!isValidCode(code)) {
     setStatus('Neplatný kód.');
     input.value = '';
     return;
   }
 
-  if(processCode(code)){
+  if (processCode(code)) {
     input.value = '';
   } else {
     input.value = '';
@@ -62,23 +62,25 @@ function hideBatteryReplaceButton() {
 
 if (flashlightBtn) {
   let timeLeft = Number(localStorage.getItem("flashlightTimeLeft")); 
-  if(timeLeft<0){flashlightBtn.addEventListener('click', () => {
-    if (flashlightActive) {
-      flashlightOff();
-      flashlightActive = false;
-      flashlightBtn.classList.remove('active');
-      hideBatteryReplaceButton();
-    } else {
-    flashlightOn(0, () => { // Výchozí čas svítilny
+  if (timeLeft < 0) {
+    flashlightBtn.addEventListener('click', () => {
+      if (flashlightActive) {
+        flashlightOff();
         flashlightActive = false;
         flashlightBtn.classList.remove('active');
-        showBatteryReplaceButton();
-      })};
-      flashlightActive = true;
-      flashlightBtn.classList.add('active');
-    })}
-    setStatus(`Svítilna zbývá: ${getTimeLeft()} s`);
-  });
+        hideBatteryReplaceButton();
+      } else {
+        flashlightOn(0, () => { // Výchozí čas svítilny
+          flashlightActive = false;
+          flashlightBtn.classList.remove('active');
+          showBatteryReplaceButton();
+        });
+        flashlightActive = true;
+        flashlightBtn.classList.add('active');
+      }
+    });
+  }
+  setStatus(`Svítilna zbývá: ${getTimeLeft()} s`);
 }
 
 // Handler pro tlačítko výměny baterie
@@ -88,7 +90,7 @@ if (batteryReplaceBtn) {
     let count = parseInt(batterySpan.textContent, 10);
     if (count > 0) {
       addBattery(-1);
-updateResourcesPanel()
+      updateResourcesPanel();
       hideBatteryReplaceButton();
       flashlightBtn.classList.add('active');
       flashlightActive = true;
