@@ -10,6 +10,7 @@ function updateDebug() {
 }
 
 export function activate(duration = 60, onDeplete) {
+  // Nastav aktuální čas podle zadané hodnoty!
   timeLeft = duration;
   save(LS_KEY, timeLeft);
   document.getElementById('flashlight-overlay').classList.add('active');
@@ -39,5 +40,5 @@ export function deactivate() {
 }
 
 export function getTimeLeft() {
-  return load(LS_KEY, 0);
+  return load(LS_KEY, 60);
 }
