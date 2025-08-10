@@ -9,14 +9,8 @@ function updateDebug() {
   if (debugEl) debugEl.textContent = `Zbývá času: ${timeLeft}s`;
 }
 
-// Upravená aktivace: pokud není explicitně požadován nový čas, použije čas z úložiště
-export function activate(defaultDuration = 60, onDeplete, forceNewTime = false) {
-  if (forceNewTime) {
-    timeLeft = defaultDuration;
-  } else {
-    const stored = load(LS_KEY, defaultDuration);
-    timeLeft = (stored > 0) ? stored : defaultDuration;
-  }
+export function activate(duration = 60, onDeplete) {
+  timeLeft = duration;
   save(LS_KEY, timeLeft);
   document.getElementById('flashlight-overlay').classList.add('active');
   updateDebug();
@@ -45,5 +39,5 @@ export function deactivate() {
 }
 
 export function getTimeLeft() {
-  return load(LS_KEY, 60);
+  return load(LS_KEY, 0);
 }
