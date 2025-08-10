@@ -61,7 +61,8 @@ function hideBatteryReplaceButton() {
 }
 
 if (flashlightBtn) {
-  flashlightBtn.addEventListener('click', () => {
+  let timeLeft = Number(localStorage.getItem("flashlightTimeLeft")); 
+  if(timeLeft<0)flashlightBtn.addEventListener('click', () => {
     if (flashlightActive) {
       flashlightOff();
       flashlightActive = false;
