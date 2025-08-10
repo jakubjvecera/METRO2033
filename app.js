@@ -87,7 +87,7 @@ if (batteryReplaceBtn) {
     let count = parseInt(batterySpan.textContent, 10);
     if (count > 0) {
       addBattery(-1);
-batterySpan.textContent = count - 1;
+updateResourcesPanel()
       hideBatteryReplaceButton();
       flashlightBtn.classList.add('active');
       flashlightActive = true;
