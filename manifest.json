@@ -1,6 +1,6 @@
 {
-  "name": "Metro Terminal",
-  "short_name": "Metro",
+  "name": "Терминал Метро 2033",
+  "short_name": "Метро",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#050505",
