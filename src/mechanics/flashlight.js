@@ -6,11 +6,10 @@ const LS_KEY = 'flashlightTimeLeft';
 
 function updateDebug() {
   const debugEl = document.getElementById('flashlight-debug');
-  if (debugEl) debugEl.textContent = `Zbývá času: ${timeLeft}s`;
+  if (debugEl) debugEl.textContent = `Zbývá času: ${timeLeft}s (uloženo: ${load(LS_KEY, 'není')})`;
 }
 
 export function activate(defaultDuration = 60, onDeplete) {
-  // načti uložený čas nebo použij default
   timeLeft = load(LS_KEY, defaultDuration);
   document.getElementById('flashlight-overlay').classList.add('active');
   updateDebug();
@@ -33,7 +32,7 @@ export function deactivate() {
   clearInterval(timer);
   timer = null;
   document.getElementById('flashlight-overlay').classList.remove('active', 'dim');
-  save(LS_KEY, timeLeft); // uloží aktuální hodnotu
+  save(LS_KEY, timeLeft);
   updateDebug();
 }
 
