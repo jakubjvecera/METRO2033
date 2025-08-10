@@ -88,8 +88,8 @@ if (flashlightBtn) {
 // Handler pro tlačítko výměny baterie
 if (batteryReplaceBtn) {
   batteryReplaceBtn.addEventListener('click', () => {
-    let count = getBattery();
-    if (count > 0) {
+    let {batteryCount} = getBattery();
+    if (batteryCount > 0) {
       dBattery(1);
       hideBatteryReplaceButton();
       flashlightBtn.classList.add('active');
