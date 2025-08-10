@@ -68,7 +68,7 @@ if (flashlightBtn) {
       flashlightBtn.classList.remove('active');
       hideBatteryReplaceButton();
     } else {
-let timeRemaining = parseInt(localStorage.getItem('flashlightTime'), 10) || 1;
+let timeRemaining = parseInt(localStorage.getItem('flashlightTime'), 10) || 0;
       if(timeRemaining > 0){
         let hovno = 45;
       }else{
