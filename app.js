@@ -62,7 +62,7 @@ function hideBatteryReplaceButton() {
 
 if (flashlightBtn) {
   let timeLeft = Number(localStorage.getItem("flashlightTimeLeft")); 
-  if (timeLeft < 0) {
+  if (timeLeft > 0) {
     flashlightBtn.addEventListener('click', () => {
       if (flashlightActive) {
         flashlightOff();
@@ -79,6 +79,9 @@ if (flashlightBtn) {
         flashlightBtn.classList.add('active');
       }
     });
+  }
+  else{
+    showBatteryReplaceButton();
   }
   setStatus(`Svítilna zbývá: ${getTimeLeft()} s`);
 }
