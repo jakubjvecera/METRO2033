@@ -68,8 +68,7 @@ if (flashlightBtn) {
       flashlightBtn.classList.remove('active');
       hideBatteryReplaceButton();
     } else {
-let timeRemaining = parseInt(localStorage.getItem('flashlightTime'), 10) || 1;
-     if(timeRemaining>0){ flashlightOn(0, () => { // Výchozí čas svítilny
+    flashlightOn(0, () => { // Výchozí čas svítilny
         flashlightActive = false;
         flashlightBtn.classList.remove('active');
         showBatteryReplaceButton();
