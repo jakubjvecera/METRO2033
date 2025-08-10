@@ -1,6 +1,6 @@
 import { loadCodesDB, isValidCode, processCode } from './codes.js';
 import { renderHistory, setStatus, updateResourcesPanel } from './console.js';
-import { loadResources, resetResources } from './resources.js';
+import { loadResources, resetResources, addBattery } from './resources.js';
 import { resetHistory } from './history.js';
 import { activate as flashlightOn, deactivate as flashlightOff, getTimeLeft } from './src/mechanics/flashlight.js';
 
@@ -86,7 +86,7 @@ if (batteryReplaceBtn) {
     const batterySpan = document.getElementById('res-b');
     let count = parseInt(batterySpan.textContent, 10);
     if (count > 0) {
-      batterySpan.textContent = count - 1;
+      addBattery(-1);
       hideBatteryReplaceButton();
       flashlightBtn.classList.add('active');
       flashlightActive = true;
