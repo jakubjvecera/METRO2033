@@ -234,51 +234,10 @@
   }
 
   function activateToolEffect(toolId) {
-    if (toolId === 'flashlight') {
-      startFlashlightTimer(60);
-    }
   }
 
   function deactivateToolEffect(toolId) {
-    if (toolId === 'flashlight') {
-      stopFlashlightTimer();
     }
-  }
-
-  function startFlashlightTimer(seconds) {
-    flashlightTimeLeft = seconds;
-    document.getElementById('flashlight-overlay').classList.add('active');
-    flashlightTimer = setInterval(() => {
-      flashlightTimeLeft--;
-      if (flashlightTimeLeft <= 10) {
-        document.getElementById('flashlight-overlay').classList.add('dim');
-      }
-      if (flashlightTimeLeft <= 0) {
-        stopFlashlightTimer();
-        showBatteryReplaceButton();
-      }
-    }, 1000);
-  }
-
-  function stopFlashlightTimer() {
-    clearInterval(flashlightTimer);
-    flashlightTimer = null;
-    document.getElementById('flashlight-overlay').classList.remove('active', 'dim');
-  }
-
-  function showBatteryReplaceButton() {
-    const batteryCount = parseInt(document.getElementById('res-b').textContent, 10);
-    if (batteryCount > 0) {
-      const btn = document.getElementById('battery-replace');
-      btn.style.display = 'block';
-      btn.onclick = () => {
-        const newCount = batteryCount - 1;
-        document.getElementById('res-b').textContent = newCount;
-        btn.style.display = 'none';
-        startFlashlightTimer(30);
-      };
-    }
-  }
 
   initTools();
 </script>
