@@ -6,7 +6,7 @@ const LS_KEY = 'flashlightTimeLeft';
 
 function updateDebug() {
   const debugEl = document.getElementById('flashlight-debug');
-  if (debugEl) debugEl.textContent = `Zbývá času: ${timeLeft}s (uloženo: ${load(LS_KEY, 'není')})`;
+  if (debugEl) debugEl.textContent = `Zbývá času: ${timeLeft}s`;
 }
 
 export function activate(defaultDuration = 60, onDeplete) {
@@ -23,7 +23,7 @@ export function activate(defaultDuration = 60, onDeplete) {
     }
     if (timeLeft <= 0) {
       deactivate();
-      if (onDeplete) onDeplete();
+      if (onDeplete) onDeplete(); // Zavolá callback při vybití
     }
   }, 1000);
 }
