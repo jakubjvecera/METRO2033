@@ -68,11 +68,12 @@ if (flashlightBtn) {
       flashlightBtn.classList.remove('active');
       hideBatteryReplaceButton();
     } else {
-      flashlightOn(45, () => { // Výchozí čas svítilny
+let timeRemaining = parseInt(localStorage.getItem('flashlightTime'), 10) || 1;
+     if(timeRemaining>0){ flashlightOn(45, () => { // Výchozí čas svítilny
         flashlightActive = false;
         flashlightBtn.classList.remove('active');
         showBatteryReplaceButton();
-      });
+      })};
       flashlightActive = true;
       flashlightBtn.classList.add('active');
     }
@@ -87,7 +88,7 @@ if (batteryReplaceBtn) {
     let count = parseInt(batterySpan.textContent, 10);
     if (count > 0) {
       addBattery(-1);
-batterySpan.textContent = count - 1;
+updateResourcesPanel()
       hideBatteryReplaceButton();
       flashlightBtn.classList.add('active');
       flashlightActive = true;
